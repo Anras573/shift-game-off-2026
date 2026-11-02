@@ -4,7 +4,14 @@ using Yaeger.Platform;
 using Yaeger.Rendering;
 using Yaeger.Windowing;
 
-using var window = Window.Create();
+using var window = Window.Create(
+    new WindowSettings
+    {
+        Title = "Gravity Shift: Dead Letter Office",
+        Width = 1280,
+        Height = 800,
+    }
+);
 var renderer = new Renderer(window);
 var game = new GravityShiftGame(new NativeInputState(), renderer, window);
 

@@ -55,7 +55,7 @@ public sealed class LevelSession
         _gravityShift = new GravityShiftSystem(World, Gravity, _controller, input);
         _movement = new PlayerMovementSystem(World, Gravity, input);
         _camera = new CameraRotationSystem(World, Gravity);
-        _rules = new LevelRulesSystem(World, level);
+        _rules = new LevelRulesSystem(World, level, _controller);
 
         if (renderSurface is not null)
             _render = new UnifiedRenderSystem(renderSurface, null, World, viewport);
@@ -137,10 +137,11 @@ public sealed class LevelSession
         World.AddComponent(walls, tilemap);
         World.AddComponent(walls, new RenderLayer(1));
 
+        // Chutes are generous (touching counts), shredders forgiving (must overlap a bit).
         foreach (var cell in level.Goals)
-            CreateTile<Goal>(level.CellCenter(cell), GoalColor);
+            CreateTrigger<Goal>(level.CellCenter(cell), GoalColor, Tuning.TileSize * 1.2f);
         foreach (var cell in level.Hazards)
-            CreateTile<Hazard>(level.CellCenter(cell), HazardColor);
+            CreateTrigger<Hazard>(level.CellCenter(cell), HazardColor, Tuning.TileSize * 0.7f);
 
         var player = World.CreateEntity("player");
         World.AddComponent(player, new Player());
@@ -160,11 +161,12 @@ public sealed class LevelSession
         );
     }
 
-    private void CreateTile<TMarker>(Vector2 position, Color color)
+    private void CreateTrigger<TMarker>(Vector2 position, Color color, float triggerSize)
         where TMarker : struct
     {
         var entity = World.CreateEntity();
         World.AddComponent(entity, default(TMarker));
+        World.AddComponent(entity, new BoxCollider2D(new Vector2(triggerSize), isTrigger: true));
         World.AddComponent(entity, new Transform2D(position, scale: new Vector2(Tuning.TileSize)));
         World.AddComponent(entity, new Sprite(IRenderSurface.SolidTexturePath, color));
         World.AddComponent(entity, new RenderLayer(2));

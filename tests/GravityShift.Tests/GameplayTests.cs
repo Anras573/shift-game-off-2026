@@ -1,3 +1,4 @@
+using System.Numerics;
 using GravityShift.Gravity;
 using GravityShift.Levels;
 using GravityShift.Systems;
@@ -25,7 +26,7 @@ public class GameplayTests
 
         Assert.Equal(LevelOutcome.Playing, session.Outcome);
         Assert.Equal(spawn.X, PlayerPosition(session).X, 3);
-        Assert.True(session.Gravity.IsOnFloor(Controller(session)));
+        Assert.True(Controller(session).IsGrounded);
     }
 
     [Fact]
@@ -38,7 +39,9 @@ public class GameplayTests
         Run(session, input, seconds: 1f);
 
         Assert.Equal(GravityDirection.Right, session.Gravity.Direction);
-        Assert.True(session.Gravity.IsOnFloor(Controller(session)));
+        // Grounding follows gravity: the right wall is now the floor.
+        Assert.True(Controller(session).IsGrounded);
+        Assert.Equal(-Vector2.UnitX, Controller(session).GroundNormal);
         Assert.Equal(
             GravityDirection.Right.CameraRotation(),
             session.World.GetComponent<Camera2D>(session.World.GetEntity("camera")).Rotation,
@@ -151,7 +154,7 @@ public class GameplayTests
         }
     }
 
-    private static System.Numerics.Vector2 PlayerPosition(LevelSession session) =>
+    private static Vector2 PlayerPosition(LevelSession session) =>
         session.World.GetComponent<Transform2D>(session.World.GetEntity("player")).Position;
 
     private static Yaeger.Physics.Components.CharacterController2D Controller(
