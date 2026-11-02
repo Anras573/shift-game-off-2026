@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Check formatting
+        run: dotnet csharpier check .
+
+      - name: Build
+        run: dotnet build GravityShift.slnx -c Release
+
+      - name: Test
+        run: dotnet test tests/GravityShift.Tests -c Release --no-build
+
+      - name: Publish web build
+        run: dotnet publish src/GravityShift.Web -c Release -o artifacts/web
+
+      - name: Upload playable web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-shift-web
+          path: artifacts/web/wwwroot
+          if-no-files-found: error
