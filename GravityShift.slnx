@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/engine/" />
+  <Folder Name="/engine/Yaeger/" />
+  <Folder Name="/engine/Yaeger/src/" />
+  <Folder Name="/engine/Yaeger/src/Engine/">
+    <Project Path="engine/Yaeger/src/Engine/Yaeger.Browser/Yaeger.Browser.csproj" />
+    <Project Path="engine/Yaeger/src/Engine/Yaeger.Core/Yaeger.Core.csproj" />
+    <Project Path="engine/Yaeger/src/Engine/Yaeger/Yaeger.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/GravityShift.Desktop/GravityShift.Desktop.csproj" />
+    <Project Path="src/GravityShift.Game/GravityShift.Game.csproj" />
+    <Project Path="src/GravityShift.Web/GravityShift.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GravityShift.Tests/GravityShift.Tests.csproj" />
+  </Folder>
+</Solution>

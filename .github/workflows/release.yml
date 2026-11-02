@@ -1,0 +1,76 @@
+name: Release
+
+# Builds the itch.io HTML5 zip plus self-contained desktop builds.
+# Runs on version tags (v0.1.0, ...) or manually from the Actions tab.
+#
+# Optional itch.io upload: add a BUTLER_API_KEY repository secret
+# (https://itch.io/user/settings/api-keys) and an ITCH_GAME repository variable
+# such as "your-name/gravity-shift". Without them, builds are only uploaded as artifacts.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Publish
+        run: dotnet publish src/GravityShift.Web -c Release -o artifacts/web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gravity-shift-web
+          path: artifacts/web/wwwroot
+          if-no-files-found: error
+
+  desktop:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid: [win-x64, linux-x64, osx-arm64, osx-x64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Publish
+        run: >
+          dotnet publish src/GravityShift.Desktop -c Release -r ${{ matrix.rid }}
+          --self-contained -p:PublishSingleFile=false -o artifacts/${{ matrix.rid }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gravity-shift-${{ matrix.rid }}
+          path: artifacts/${{ matrix.rid }}
+          if-no-files-found: error
+
+  itch:
+    needs: [web, desktop]
+    runs-on: ubuntu-latest
+    if: ${{ vars.ITCH_GAME != '' }}
+    env:
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: builds
+      - name: Install butler
+        run: |
+          curl -fsSL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler && chmod +x butler/butler
+      - name: Push to itch.io
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          ./butler/butler push builds/gravity-shift-web       "${{ vars.ITCH_GAME }}:html5"   --userversion "$VERSION"
+          ./butler/butler push builds/gravity-shift-win-x64   "${{ vars.ITCH_GAME }}:windows" --userversion "$VERSION"
+          ./butler/butler push builds/gravity-shift-linux-x64 "${{ vars.ITCH_GAME }}:linux"   --userversion "$VERSION"
+          ./butler/butler push builds/gravity-shift-osx-arm64 "${{ vars.ITCH_GAME }}:mac-arm" --userversion "$VERSION"
+          ./butler/butler push builds/gravity-shift-osx-x64   "${{ vars.ITCH_GAME }}:mac-intel" --userversion "$VERSION"

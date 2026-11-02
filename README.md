@@ -1,2 +1,98 @@
-# shift-game-off-2026
-My submission for [itch.io's Game Off 2026](https://itch.io/jam/game-off-2026)
+# Gravity Shift: Dead Letter Office
+
+My submission for [itch.io's Game Off 2026](https://itch.io/jam/game-off-2026) (theme: **SHIFT**),
+built with the [Yaeger](https://github.com/Anras573/Yaeger) engine.
+
+> You're a parcel lost in a sorting facility on the night shift. You can't jump. You can't
+> climb. But you *can* shift gravity. Find the delivery chute and avoid the shredders.
+
+## Controls
+
+| Input | Action |
+|-------|--------|
+| A / D or ← / → | Walk along the current floor |
+| Q (or Z) | Shift gravity: the **left** wall becomes the floor |
+| E (or X) | Shift gravity: the **right** wall becomes the floor |
+| W, ↑ or Space | Flip gravity: the **ceiling** becomes the floor |
+| R | Restart the level |
+| Esc | Quit (desktop) |
+
+## Repository layout
+
+```
+engine/Yaeger/             Yaeger engine (git submodule, pinned to a commit)
+src/GravityShift.Game/     All gameplay. References Yaeger.Core only, so it runs on both hosts.
+  Gravity/                 GravityDirection maths + per-level GravityState
+  Levels/                  ASCII level format, parser and the level catalog
+  Systems/                 Gravity shifting, walking, camera rotation, win/lose rules
+  LevelSession.cs          One attempt at one level (its own World + systems)
+  GravityShiftGame.cs      Level progression; what the hosts drive each frame
+src/GravityShift.Desktop/  Native host (Silk.NET/OpenGL). Use for day-to-day development.
+src/GravityShift.Web/      Blazor WebAssembly host (WebGL 2). This is what ships to itch.io.
+tests/GravityShift.Tests/  xunit tests, including headless play-throughs of every level.
+```
+
+## Getting started
+
+Requires the .NET 10 SDK.
+
+```bash
+git clone --recurse-submodules https://github.com/Anras573/shift-game-off-2026.git
+cd shift-game-off-2026
+```
+
+(Already cloned without submodules? Run `git submodule update --init --recursive`.)
+
+```bash
+dotnet run --project src/GravityShift.Desktop      # play natively
+dotnet run --project src/GravityShift.Web          # play in the browser (open the printed URL)
+dotnet test tests/GravityShift.Tests               # run the tests
+dotnet tool restore && dotnet csharpier format .   # format (CI runs `csharpier check`)
+```
+
+## Adding levels
+
+Levels live in `src/GravityShift.Game/Levels/LevelCatalog.cs` as 16×16 ASCII grids:
+
+| Char | Meaning |
+|------|---------|
+| `#` | Wall |
+| `.` | Empty |
+| `P` | Parcel spawn (exactly one) |
+| `G` | Delivery chute / goal (one or more) |
+| `X` | Shredder / hazard |
+
+Keep rooms square so they stay on screen at every camera rotation. Add a play-through test in
+`GameplayTests.cs` for each new level. It proves the level is solvable and guards against tuning
+changes breaking it. Once there are many levels, switch to Tiled via Yaeger's `TiledMapLoader`.
+
+Gameplay feel (gravity, walk speed, shift cooldown, camera easing) is all in `Tuning.cs`.
+
+## Shipping to itch.io
+
+- **CI** (`.github/workflows/ci.yml`) checks formatting, builds, tests, and uploads a playable
+  `gravity-shift-web` artifact on every push and PR.
+- **Release** (`.github/workflows/release.yml`) runs on `v*` tags or manually. It builds the web
+  version plus self-contained Windows, Linux and macOS desktop builds. To have it push straight
+  to itch.io with butler, add:
+  - repository secret `BUTLER_API_KEY` (from https://itch.io/user/settings/api-keys)
+  - repository variable `ITCH_GAME`, e.g. `your-name/gravity-shift`
+
+On itch.io, set the project's kind to **HTML** and tick "This file will be played in the browser"
+on the `html5` channel upload. The web build uses a relative `<base href>`, so it works from
+itch's sub-path.
+
+## Updating the engine
+
+```bash
+git -C engine/Yaeger fetch origin main
+git -C engine/Yaeger checkout origin/main
+dotnet test tests/GravityShift.Tests   # make sure everything still works
+git add engine/Yaeger && git commit -m "Bump Yaeger"
+```
+
+## Jam rules reminder
+
+- Submissions close **December 1, 2026 at 13:37 PST**.
+- Source must be in a public GitHub repo (this one).
+- Theme: **SHIFT**: gravity shifts, on the night shift.

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Native host (Silk.NET / OpenGL). Use this for day-to-day development. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>GravityShift</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\engine\Yaeger\src\Engine\Yaeger\Yaeger.csproj" />
+    <ProjectReference Include="..\GravityShift.Game\GravityShift.Game.csproj" />
+  </ItemGroup>
+</Project>
