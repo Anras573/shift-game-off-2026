@@ -8,7 +8,8 @@ namespace GravityShift.Hud;
 
 /// <summary>
 /// Screen-space HUD: level title, shift counter and a result banner, drawn after the level in
-/// a second pass with no camera (so it never rotates with gravity).
+/// an overlay pass (<c>Render(clear: false)</c>) from its own world, so it survives level
+/// changes. Yaeger draws <c>Text</c> in screen space, so it never rotates with gravity.
 /// </summary>
 public sealed class HudOverlay
 {
@@ -36,12 +37,7 @@ public sealed class HudOverlay
     )
     {
         _viewport = viewport;
-        _render = new UnifiedRenderSystem(
-            new OverlayRenderSurface(renderSurface),
-            textSurface,
-            _world,
-            viewport
-        );
+        _render = new UnifiedRenderSystem(renderSurface, textSurface, _world, viewport);
         _title = CreateLabel(font, TitleSize, TitleColor);
         _counter = CreateLabel(font, BodySize, BodyColor);
         _banner = CreateLabel(font, BodySize, BannerColor);
@@ -61,7 +57,7 @@ public sealed class HudOverlay
     public void Render()
     {
         Layout();
-        _render.Render();
+        _render.Render(clear: false); // on top of the level pass
     }
 
     // Text is laid out in pixels; scale pixels to NDC and stack lines from the top-left.

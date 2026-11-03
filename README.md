@@ -28,7 +28,7 @@ your best for each level this session. Press R to retry for par.
 ```
 engine/Yaeger/             Yaeger engine (git submodule, pinned to a commit)
 src/GravityShift.Game/     All gameplay. References Yaeger.Core only, so it runs on both hosts.
-  Hud/                     Shift counter / par / result banner, drawn in a camera-less second pass
+  Hud/                     Shift counter / par / result banner, drawn in an overlay pass
   Gravity/                 GravityDirection maths + per-level GravityState
   Levels/                  ASCII level format, parser and the level catalog
   Systems/                 Gravity shifting, walking, camera rotation, win/lose rules

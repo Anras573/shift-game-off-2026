@@ -8,7 +8,7 @@ namespace GravityShift.Tests;
 public class HudOverlayTests
 {
     [Fact]
-    public void Render_DrawsOnTopWithoutClearing_AndIgnoresTheCamera()
+    public void Render_DrawsOnTopWithoutClearing_InScreenSpace()
     {
         var surface = new RecordingSurface();
         var text = new RecordingText();
@@ -17,7 +17,7 @@ public class HudOverlayTests
         hud.Set("1/8  First Day", "Shifts 0   Par 1", "");
         hud.Render();
 
-        Assert.Equal(0, surface.BeginFrames); // the level's pass already cleared the screen
+        Assert.Equal([false], surface.BeginFrames); // never clears: the level pass already drew
         Assert.Equal(1, surface.EndFrames);
         Assert.Equal(Matrix4x4.Identity, surface.Camera); // screen-space, never rotated
         Assert.Contains("1/8  First Day", text.Drawn);
@@ -53,11 +53,13 @@ public class HudOverlayTests
 
     private sealed class RecordingSurface : IRenderSurface
     {
-        public int BeginFrames;
+        public readonly List<bool> BeginFrames = [];
         public int EndFrames;
         public Matrix4x4? Camera;
 
-        public void BeginFrame() => BeginFrames++;
+        public void BeginFrame() => BeginFrames.Add(true);
+
+        public void BeginFrame(bool clear) => BeginFrames.Add(clear);
 
         public void EndFrame() => EndFrames++;
 
