@@ -7,8 +7,8 @@ Deadline: **December 1, 2026, 13:37 PST**. Aim to have something submittable a w
 - [x] Gravity shift (Q/E), flip (W), walking, camera rotation
 - [x] Goal / hazard / out-of-bounds rules, restart, level progression
 - [x] Three tutorial levels, each with a headless play-through test
-- [ ] Publish a first web build to itch.io (draft/private page) and check it loads in the iframe
-- [ ] Decide: allow shifting mid-air, or only when on the floor?
+- [x] Publish a first web build to itch.io (draft/private page) and check it loads in the iframe
+- [x] Decided: shifting is allowed mid-air (only the cooldown limits it), for chained-shift levels
 
 ## Week 2 (Nov 9–15): content and feel
 - [ ] 8–12 levels (consider moving to Tiled via `TiledMapLoader`)

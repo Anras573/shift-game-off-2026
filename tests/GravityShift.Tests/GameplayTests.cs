@@ -30,6 +30,27 @@ public class GameplayTests
     }
 
     [Fact]
+    public void Shift_WorksInMidAir()
+    {
+        // Design decision: shifting is allowed while falling (only the cooldown limits it),
+        // so levels can chain shifts in mid-air.
+        var input = new FakeInput();
+        var session = new LevelSession(LevelCatalog.All[0], input);
+        Run(session, input, seconds: 0.5f);
+
+        Shift(session, input, Keys.W); // flip: start falling up towards the ceiling
+        Assert.False(Controller(session).IsGrounded);
+
+        Shift(session, input, Keys.Q); // shift again before landing
+        Assert.Equal(GravityDirection.Right, session.Gravity.Direction);
+        Assert.Equal(2, session.Gravity.ShiftCount);
+
+        Run(session, input, seconds: 1f);
+        Assert.True(Controller(session).IsGrounded);
+        Assert.Equal(-Vector2.UnitX, Controller(session).GroundNormal);
+    }
+
+    [Fact]
     public void Shift_RotatesGravityAndCamera()
     {
         var input = new FakeInput();

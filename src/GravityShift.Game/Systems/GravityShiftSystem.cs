@@ -41,7 +41,10 @@ public sealed class GravityShiftSystem(
     public void Update(float deltaTime) =>
         gravity.Cooldown = MathF.Max(0f, gravity.Cooldown - deltaTime);
 
-    /// <summary>Applies a new gravity direction immediately (if off cooldown).</summary>
+    /// <summary>
+    /// Applies a new gravity direction immediately if off cooldown. Deliberately works in
+    /// mid-air too (no grounded check) so levels can be built around chained shifts.
+    /// </summary>
     public bool TryShift(GravityDirection newDirection)
     {
         if (gravity.Cooldown > 0f || newDirection == gravity.Direction)
