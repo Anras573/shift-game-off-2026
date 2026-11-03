@@ -62,9 +62,10 @@ Levels live in `src/GravityShift.Game/Levels/LevelCatalog.cs` as 16×16 ASCII gr
 | `G` | Delivery chute / goal (one or more) |
 | `X` | Shredder / hazard |
 
-Keep rooms square so they stay on screen at every camera rotation. Add a play-through test in
-`GameplayTests.cs` for each new level. It proves the level is solvable and guards against tuning
-changes breaking it. Once there are many levels, switch to Tiled via Yaeger's `TiledMapLoader`.
+See [`docs/LEVEL_DESIGN.md`](docs/LEVEL_DESIGN.md) for the workflow and the design rules:
+check the room with `python3 tools/level_solver.py "Name"`, add a play-through to
+`LevelSolutionTests.cs` (required for every level), and playtest with `?level=N` in the
+browser build.
 
 Gameplay feel (gravity, walk speed, shift cooldown, camera easing) is all in `Tuning.cs`.
 

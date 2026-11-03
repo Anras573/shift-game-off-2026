@@ -36,6 +36,7 @@ public sealed class GravityShiftGame
     }
 
     public int LevelIndex { get; private set; }
+    public int LevelCount => _levels.Count;
     public LevelSession Session { get; private set; }
 
     /// <summary>Raised when a level starts (including restarts), e.g. to update a title label.</summary>
