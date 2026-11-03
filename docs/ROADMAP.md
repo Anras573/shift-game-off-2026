@@ -11,7 +11,8 @@ Deadline: **December 1, 2026, 13:37 PST**. Aim to have something submittable a w
 - [x] Decided: shifting is allowed mid-air (only the cooldown limits it), for chained-shift levels
 
 ## Week 2 (Nov 9–15): content and feel
-- [ ] 8–12 levels (consider moving to Tiled via `TiledMapLoader`)
+- [x] 8 levels, each with a real-physics play-through test and a solver check (`docs/LEVEL_DESIGN.md`)
+- [ ] More levels using the new pieces below (Tiled via `TiledMapLoader` if the ASCII format gets limiting)
 - [ ] New pieces: conveyor belts (kinematic `PlatformPath`), crates the parcel can push,
       fragile crates that break on hard landings, "stamp" zones that lock gravity
 - [ ] Screen shake on landings (`CameraShake`), squash/stretch tween on the parcel

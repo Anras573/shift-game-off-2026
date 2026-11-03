@@ -28,6 +28,11 @@
         var timeSource = new BrowserTimeSource();
         var game = new GravityShiftGame(new BrowserInputState(), _renderSurface, _renderSurface);
 
+        // Playtesting shortcut: ?level=5 starts on the fifth level.
+        var query = System.Web.HttpUtility.ParseQueryString(new Uri(Nav.Uri).Query);
+        if (int.TryParse(query["level"], out var level) && level >= 1 && level <= game.LevelCount)
+            game.LoadLevel(level - 1);
+
         // StartGameLoop calls BrowserInputState.BeginFrame/EndFrame around every tick.
         YaegerBrowser.StartGameLoop(timestampMs =>
         {
