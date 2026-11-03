@@ -73,10 +73,14 @@ Gameplay feel (gravity, walk speed, shift cooldown, camera easing) is all in `Tu
 - **CI** (`.github/workflows/ci.yml`) checks formatting, builds, tests, and uploads a playable
   `gravity-shift-web` artifact on every push and PR.
 - **Release** (`.github/workflows/release.yml`) runs on `v*` tags or manually. It builds the web
-  version plus self-contained Windows, Linux and macOS desktop builds. To have it push straight
-  to itch.io with butler, add:
+  version plus self-contained Windows (`.zip`), Linux and macOS (`.tar.gz`, so the executable keeps
+  its `+x` bit) desktop builds, packaged by `scripts/package-desktop.sh`. On a tag it also publishes
+  a GitHub Release with all five downloads attached. To have it push straight to itch.io with
+  butler, add:
   - repository secret `BUTLER_API_KEY` (from https://itch.io/user/settings/api-keys)
   - repository variable `ITCH_GAME`, e.g. `your-name/gravity-shift`
+
+To release: `git tag -a v0.2.0 -m "..." && git push origin v0.2.0`.
 
 On itch.io, set the project's kind to **HTML** and tick "This file will be played in the browser"
 on the `html5` channel upload. The web build uses a relative `<base href>`, so it works from
