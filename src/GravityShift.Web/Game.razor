@@ -4,6 +4,7 @@
 <canvas id="yaeger-canvas" tabindex="0"></canvas>
 
 @code {
+    private const string HudFontFamily = "GravityShiftHud";
     private BrowserRenderSurface? _renderSurface;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -25,8 +26,17 @@
             [Keys.Left, Keys.Right, Keys.Up, Keys.Down, Keys.Space]
         );
 
+        // HUD font (DejaVu Sans Bold, see fonts/LICENSE-DejaVu.txt), registered via FontFace.
+        await BrowserTextRenderSurface.LoadFontAsync(HudFontFamily, "fonts/DejaVuSans-Bold.ttf");
+
         var timeSource = new BrowserTimeSource();
-        var game = new GravityShiftGame(new BrowserInputState(), _renderSurface, _renderSurface);
+        var game = new GravityShiftGame(
+            new BrowserInputState(),
+            _renderSurface,
+            _renderSurface,
+            textSurface: new BrowserTextRenderSurface(_renderSurface),
+            hudFont: new Yaeger.Graphics.FontHandle(HudFontFamily)
+        );
 
         // Playtesting shortcut: ?level=5 starts on the fifth level.
         var query = System.Web.HttpUtility.ParseQueryString(new Uri(Nav.Uri).Query);

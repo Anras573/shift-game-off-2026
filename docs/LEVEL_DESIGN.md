@@ -6,7 +6,7 @@ screen at every camera rotation.
 
 ## Workflow
 
-1. Sketch the room in `LevelCatalog.cs`.
+1. Sketch the room in `LevelCatalog.cs`, with `par:` set to the solver's minimum.
 2. Run the solver to get the minimum shift count and spot shortcuts:
 
    ```bash
@@ -17,7 +17,8 @@ screen at every camera rotation.
    (`None` means the level *requires* shifting mid-air).
 3. Add a real-physics play-through to `Solutions` in
    `tests/GravityShift.Tests/LevelSolutionTests.cs`. `EveryLevelHasAWorkingSolution` fails
-   until you do. Prefer `WalkToWall` / `WalkInto` and wall stops over timed waits.
+   until you do, and it must finish within par (proving par is achievable in real physics).
+   Prefer `WalkToWall` / `WalkInto` and wall stops over timed waits.
 4. Play it in the browser build with `?level=N` (1-based), e.g.
    `http://localhost:5000/?level=6` after `dotnet run --project src/GravityShift.Web`.
 

@@ -1,4 +1,5 @@
 using GravityShift;
+using Yaeger.Font;
 using Yaeger.Input;
 using Yaeger.Platform;
 using Yaeger.Rendering;
@@ -13,10 +14,23 @@ using var window = Window.Create(
     }
 );
 var renderer = new Renderer(window);
-var game = new GravityShiftGame(new NativeInputState(), renderer, window);
+var textRenderer = new TextRenderer(window);
+using var fonts = new FontManager();
+var hudFont = fonts.Load(
+    Path.Combine(AppContext.BaseDirectory, "Assets", "Fonts", "DejaVuSans-Bold.ttf")
+);
 
-game.LevelStarted += level => Console.WriteLine($"Level: {level.Name}");
-game.LevelEnded += (level, outcome) => Console.WriteLine($"{level.Name}: {outcome}");
+var game = new GravityShiftGame(
+    new NativeInputState(),
+    renderer,
+    window,
+    textSurface: textRenderer,
+    hudFont: hudFont
+);
+
+game.LevelStarted += level => Console.WriteLine($"Level: {level.Name} (par {level.Par})");
+game.LevelEnded += (level, outcome, shifts) =>
+    Console.WriteLine($"{level.Name}: {outcome} in {shifts} shift(s)");
 
 Keyboard.AddKeyDown(Keys.Escape, window.Close);
 window.OnUpdate += delta => game.Update((float)delta);

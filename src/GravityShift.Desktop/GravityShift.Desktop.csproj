@@ -8,6 +8,25 @@
     <AssemblyName>GravityShift</AssemblyName>
   </PropertyGroup>
 
+  <!-- The HUD font lives with the web build; copy it next to the desktop executable too. -->
+  <ItemGroup>
+    <None
+      Include="..\GravityShift.Web\wwwroot\fonts\*"
+      Link="Assets\Fonts\%(Filename)%(Extension)"
+      CopyToOutputDirectory="PreserveNewest"
+      CopyToPublishDirectory="PreserveNewest"
+    />
+  </ItemGroup>
+
+  <!--
+    Workaround: Yaeger references SkiaSharp (used for native text) but not its Linux native
+    library, so text crashes on Linux with "Unable to load shared library 'libSkiaSharp'".
+    Remove once the engine references SkiaSharp.NativeAssets.Linux itself.
+  -->
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\engine\Yaeger\src\Engine\Yaeger\Yaeger.csproj" />
     <ProjectReference Include="..\GravityShift.Game\GravityShift.Game.csproj" />

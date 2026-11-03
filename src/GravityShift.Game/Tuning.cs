@@ -30,6 +30,12 @@ public static class Tuning
     /// <summary>Camera zoom. 1 shows exactly 2 world units vertically; rooms are 2 units square.</summary>
     public const float CameraZoom = 0.9f;
 
+    /// <summary>Seconds the "Delivered" banner shows before the next level starts.</summary>
+    public const float DeliveredPause = 1.6f;
+
+    /// <summary>Seconds the "Shredded" / "Lost" banner shows before the level restarts.</summary>
+    public const float FailedPause = 0.8f;
+
     /// <summary>Fixed simulation step, in seconds. Keeps physics frame-rate independent.</summary>
     public const float FixedTimeStep = 1f / 120f;
 

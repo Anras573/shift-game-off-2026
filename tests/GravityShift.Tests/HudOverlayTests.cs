@@ -1,0 +1,106 @@
+using System.Numerics;
+using GravityShift.Hud;
+using Yaeger.Graphics;
+using Yaeger.Platform;
+
+namespace GravityShift.Tests;
+
+public class HudOverlayTests
+{
+    [Fact]
+    public void Render_DrawsOnTopWithoutClearing_AndIgnoresTheCamera()
+    {
+        var surface = new RecordingSurface();
+        var text = new RecordingText();
+        var hud = new HudOverlay(surface, text, new FixedViewport(), new FontHandle("test"));
+
+        hud.Set("1/8  First Day", "Shifts 0   Par 1", "");
+        hud.Render();
+
+        Assert.Equal(0, surface.BeginFrames); // the level's pass already cleared the screen
+        Assert.Equal(1, surface.EndFrames);
+        Assert.Equal(Matrix4x4.Identity, surface.Camera); // screen-space, never rotated
+        Assert.Contains("1/8  First Day", text.Drawn);
+        Assert.Contains("Shifts 0   Par 1", text.Drawn);
+    }
+
+    [Fact]
+    public void Labels_StartAtTheTopLeft_AndScalePixelsToScreen()
+    {
+        var text = new RecordingText();
+        var hud = new HudOverlay(
+            new RecordingSurface(),
+            text,
+            new FixedViewport(),
+            new FontHandle("test")
+        );
+
+        hud.Set("Title", "Counter", "Banner");
+        hud.Render();
+
+        var title = text.Transforms["Title"];
+        Assert.Equal(2f / 800f, title.M11, 6); // one layout pixel = 2/width in NDC
+        Assert.True(title.M41 < -0.9f && title.M42 > 0.8f, $"Title at ({title.M41}, {title.M42})");
+        Assert.True(text.Transforms["Counter"].M42 < title.M42);
+        Assert.True(text.Transforms["Banner"].M42 < text.Transforms["Counter"].M42);
+    }
+
+    private sealed class FixedViewport : IViewport
+    {
+        public Vector2 Size => new(800, 600);
+        public float PixelRatio => 1f;
+    }
+
+    private sealed class RecordingSurface : IRenderSurface
+    {
+        public int BeginFrames;
+        public int EndFrames;
+        public Matrix4x4? Camera;
+
+        public void BeginFrame() => BeginFrames++;
+
+        public void EndFrame() => EndFrames++;
+
+        public void FlushQueuedQuads() { }
+
+        public void SetCamera(Matrix4x4 viewProjection) => Camera = viewProjection;
+
+        public void SubmitQuad(Matrix4x4 transform, string texturePath, Vector4 color) { }
+
+        public void SubmitQuad(
+            Matrix4x4 transform,
+            string texturePath,
+            Vector2 uvMin,
+            Vector2 uvMax,
+            Vector4 color
+        ) { }
+    }
+
+    private sealed class RecordingText : ITextRenderSurface
+    {
+        public readonly List<string> Drawn = [];
+        public readonly Dictionary<string, Matrix4x4> Transforms = [];
+
+        public void DrawText(
+            string text,
+            Matrix4x4 transform,
+            FontHandle font,
+            int fontSize,
+            Color color
+        ) => Record(text, transform);
+
+        public void DrawText(
+            string text,
+            Matrix4x4 transform,
+            IFontHandle font,
+            int fontSize,
+            Color color
+        ) => Record(text, transform);
+
+        private void Record(string text, Matrix4x4 transform)
+        {
+            Drawn.Add(text);
+            Transforms[text] = transform;
+        }
+    }
+}

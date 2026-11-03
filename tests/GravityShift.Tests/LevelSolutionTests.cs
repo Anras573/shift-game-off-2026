@@ -28,16 +28,13 @@ public class LevelSolutionTests
                 .Settle(),
 
         ["Sorting Office"] = bot =>
-            bot.Shift(Keys.W) // up the corridor
+            bot.Shift(Keys.E) // the corridor wall becomes the floor
                 .Settle()
-                .Walk(Keys.Left, c => c.Column >= 9) // along the ceiling, past the box
-                .Shift(Keys.Q) // right wall
+                .WalkToWall(Keys.Right) // up the corridor, off the top, across the ceiling
+                .WalkInto(Keys.Left, row: 10) // down the right wall
+                .Shift(Keys.W) // across to the box's corridor wall
                 .Settle()
-                .Walk(Keys.Left, c => c.Row >= 10) // down the right wall
-                .Shift(Keys.W) // across to the corridor wall
-                .Settle()
-                .Shift(Keys.Q) // up into the box
-                .Settle(),
+                .Walk(Keys.Left, _ => false), // up the wall into the box
 
         ["Return to Sender"] = bot =>
             bot.Walk(Keys.Right, c => c.Row >= 3) // off the ledge
@@ -51,8 +48,7 @@ public class LevelSolutionTests
                 .WalkInto(Keys.Right, row: 7) // up into the corridor under the box
                 .Shift(Keys.W) // fly left; the far wall lines you up with the opening
                 .Settle()
-                .Shift(Keys.Q) // rise into the box
-                .Settle(),
+                .Walk(Keys.Left, _ => false), // walk up the wall into the box
 
         ["Express Post"] = bot =>
             bot.Shift(Keys.E) // right wall
@@ -103,9 +99,17 @@ public class LevelSolutionTests
         Assert.True(Solutions.ContainsKey(name), $"Add a solution for '{name}'.");
         var bot = new Bot(LevelCatalog.All.Single(l => l.Name == name));
 
+        var level = bot.Session.Level;
+
         Solutions[name](bot);
 
         Assert.Equal(LevelOutcome.Delivered, bot.Outcome);
+        // The script proves par is achievable, so it must not need more shifts than par.
+        Assert.True(level.Par > 0, $"'{name}' has no par.");
+        Assert.True(
+            bot.Session.Gravity.ShiftCount <= level.Par,
+            $"'{name}' solution used {bot.Session.Gravity.ShiftCount} shifts; par is {level.Par}."
+        );
     }
 
     [Fact]
