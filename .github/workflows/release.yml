@@ -14,7 +14,9 @@ on:
   workflow_dispatch:
 
 env:
-  VERSION: ${{ github.ref_name }}
+  # Not "VERSION": MSBuild reads environment variables as properties, so VERSION=v0.1.1 would
+  # become $(Version) and fail NuGet restore ("'v0.1.1' is not a valid version string").
+  RELEASE_VERSION: ${{ github.ref_name }}
 
 jobs:
   web:
@@ -53,7 +55,7 @@ jobs:
           --self-contained -p:PublishSingleFile=false -o artifacts/publish/${{ matrix.rid }}
       # .zip for Windows, .tar.gz for Linux/macOS so the executable keeps its +x bit.
       - name: Package
-        run: bash scripts/package-desktop.sh artifacts/publish/${{ matrix.rid }} ${{ matrix.rid }} "$VERSION" artifacts/packages
+        run: bash scripts/package-desktop.sh artifacts/publish/${{ matrix.rid }} ${{ matrix.rid }} "$RELEASE_VERSION" artifacts/packages
       - uses: actions/upload-artifact@v4
         with:
           name: gravity-shift-${{ matrix.rid }}
@@ -75,7 +77,7 @@ jobs:
       - name: Collect release files
         run: |
           mkdir -p release
-          (cd builds/gravity-shift-web && zip -qr "../../release/gravity-shift-${VERSION}-web.zip" .)
+          (cd builds/gravity-shift-web && zip -qr "../../release/gravity-shift-${RELEASE_VERSION}-web.zip" .)
           find builds -name 'gravity-shift-*-*.zip' -o -name 'gravity-shift-*-*.tar.gz' | xargs -I{} cp {} release/
           ls -l release
       - uses: softprops/action-gh-release@v2
@@ -128,8 +130,8 @@ jobs:
           unzip -q butler.zip -d butler && chmod +x butler/butler
       - name: Push to itch.io
         run: |
-          ./butler/butler push builds/gravity-shift-web "${{ vars.ITCH_GAME }}:html5"     --userversion "$VERSION"
-          ./butler/butler push unpacked/win-x64/*       "${{ vars.ITCH_GAME }}:windows"   --userversion "$VERSION"
-          ./butler/butler push unpacked/linux-x64/*     "${{ vars.ITCH_GAME }}:linux"     --userversion "$VERSION"
-          ./butler/butler push unpacked/osx-arm64/*     "${{ vars.ITCH_GAME }}:mac-arm"   --userversion "$VERSION"
-          ./butler/butler push unpacked/osx-x64/*       "${{ vars.ITCH_GAME }}:mac-intel" --userversion "$VERSION"
+          ./butler/butler push builds/gravity-shift-web "${{ vars.ITCH_GAME }}:html5"     --userversion "$RELEASE_VERSION"
+          ./butler/butler push unpacked/win-x64/*       "${{ vars.ITCH_GAME }}:windows"   --userversion "$RELEASE_VERSION"
+          ./butler/butler push unpacked/linux-x64/*     "${{ vars.ITCH_GAME }}:linux"     --userversion "$RELEASE_VERSION"
+          ./butler/butler push unpacked/osx-arm64/*     "${{ vars.ITCH_GAME }}:mac-arm"   --userversion "$RELEASE_VERSION"
+          ./butler/butler push unpacked/osx-x64/*       "${{ vars.ITCH_GAME }}:mac-intel" --userversion "$RELEASE_VERSION"
