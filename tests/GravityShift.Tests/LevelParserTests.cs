@@ -38,6 +38,14 @@ public class LevelParserTests
         Assert.Throws<FormatException>(() => LevelParser.Parse("bad", rows.Split('|')));
 
     [Fact]
+    public void Parse_StoresParAndRejectsNegativePar()
+    {
+        Assert.Equal(3, LevelParser.Parse("t", ["PG"], par: 3).Par);
+        Assert.Equal(0, LevelParser.Parse("t", ["PG"]).Par);
+        Assert.Throws<ArgumentOutOfRangeException>(() => LevelParser.Parse("t", ["PG"], par: -1));
+    }
+
+    [Fact]
     public void Catalog_LevelsAreFullyEnclosedExceptForGoals()
     {
         foreach (var level in LevelCatalog.All)

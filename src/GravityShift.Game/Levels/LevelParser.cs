@@ -16,8 +16,9 @@ namespace GravityShift.Levels;
 /// </remarks>
 public static class LevelParser
 {
-    public static LevelData Parse(string name, IReadOnlyList<string> rows)
+    public static LevelData Parse(string name, IReadOnlyList<string> rows, int par = 0)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(par);
         if (rows.Count == 0)
             throw new FormatException($"Level '{name}' has no rows.");
 
@@ -77,6 +78,7 @@ public static class LevelParser
         return new LevelData
         {
             Name = name,
+            Par = par,
             Width = width,
             Height = height,
             Solid = solid,

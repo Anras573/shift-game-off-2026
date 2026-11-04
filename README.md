@@ -6,6 +6,12 @@ built with the [Yaeger](https://github.com/Anras573/Yaeger) engine.
 > You're a parcel lost in a sorting facility on the night shift. You can't jump. You can't
 > climb. But you *can* shift gravity. Find the delivery chute and avoid the shredders.
 
+## How to play
+
+Reach the yellow delivery chute without touching the red shredders. Every gravity shift
+counts: the HUD shows your shifts against the level's **par** (the fewest possible), and
+your best for each level this session. Press R to retry for par.
+
 ## Controls
 
 | Input | Action |
@@ -14,7 +20,7 @@ built with the [Yaeger](https://github.com/Anras573/Yaeger) engine.
 | Q (or Z) | Shift gravity: the **left** wall becomes the floor |
 | E (or X) | Shift gravity: the **right** wall becomes the floor |
 | W, ↑ or Space | Flip gravity: the **ceiling** becomes the floor |
-| R | Restart the level |
+| R | Restart the level (also skips the result banner) |
 | Esc | Quit (desktop) |
 
 ## Repository layout
@@ -22,6 +28,7 @@ built with the [Yaeger](https://github.com/Anras573/Yaeger) engine.
 ```
 engine/Yaeger/             Yaeger engine (git submodule, pinned to a commit)
 src/GravityShift.Game/     All gameplay. References Yaeger.Core only, so it runs on both hosts.
+  Hud/                     Shift counter / par / result banner, drawn in an overlay pass
   Gravity/                 GravityDirection maths + per-level GravityState
   Levels/                  ASCII level format, parser and the level catalog
   Systems/                 Gravity shifting, walking, camera rotation, win/lose rules
@@ -95,6 +102,11 @@ git -C engine/Yaeger checkout origin/main
 dotnet test tests/GravityShift.Tests   # make sure everything still works
 git add engine/Yaeger && git commit -m "Bump Yaeger"
 ```
+
+## Third-party assets
+
+- `src/GravityShift.Web/wwwroot/fonts/DejaVuSans-Bold.ttf`: DejaVu fonts, Bitstream Vera
+  license (DejaVu changes are public domain). See `LICENSE-DejaVu.txt` next to it.
 
 ## Jam rules reminder
 

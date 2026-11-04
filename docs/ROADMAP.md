@@ -16,7 +16,7 @@ Deadline: **December 1, 2026, 13:37 PST**. Aim to have something submittable a w
 - [ ] New pieces: conveyor belts (kinematic `PlatformPath`), crates the parcel can push,
       fragile crates that break on hard landings, "stamp" zones that lock gravity
 - [ ] Screen shake on landings (`CameraShake`), squash/stretch tween on the parcel
-- [ ] Shift counter / par per level
+- [x] Shift counter with par per level, best per session, result banner (HUD)
 
 ## Week 3 (Nov 16–22): presentation
 - [ ] Art: parcel sprite with a face that looks "down", tile set for walls/chutes/shredders

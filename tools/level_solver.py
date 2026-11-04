@@ -119,8 +119,10 @@ def report(name, rows):
 def load_catalog(path):
     import re
     src = open(path, encoding="utf-8").read()
-    blocks = re.findall(r'LevelParser\.Parse\(\s*"([^"]+)",\s*\[(.*?)\]\s*\)', src, re.S)
-    return [(name, re.findall(r'"([^"]*)"', body)) for name, body in blocks]
+    blocks = re.findall(
+        r'LevelParser\.Parse\(\s*"([^"]+)",\s*\[(.*?)\]\s*,?\s*(?:par:\s*(\d+)\s*)?\)', src, re.S
+    )
+    return [(name, re.findall(r'"([^"]*)"', body), int(par) if par else 0) for name, body, par in blocks]
 
 
 if __name__ == "__main__":
@@ -128,6 +130,11 @@ if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     catalog = os.path.join(here, "..", "src", "GravityShift.Game", "Levels", "LevelCatalog.cs")
     wanted = set(sys.argv[1:])
-    for name, rows in load_catalog(catalog):
+    problems = 0
+    for name, rows, par in load_catalog(catalog):
         if not wanted or name in wanted:
-            report(name, rows)
+            best, _ = report(name, rows)
+            if best != par:
+                problems += 1
+                print(f"    !! par is {par} in LevelCatalog.cs, solver minimum is {best}")
+    sys.exit(1 if problems else 0)

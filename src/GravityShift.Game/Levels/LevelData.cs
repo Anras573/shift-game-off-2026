@@ -15,6 +15,12 @@ public sealed class LevelData
     /// <summary>Row-major solidity grid; <c>true</c> means wall.</summary>
     public required bool[] Solid { get; init; }
 
+    /// <summary>
+    /// Fewest shifts that solve the level (from <c>tools/level_solver.py</c>, proven by
+    /// <c>LevelSolutionTests</c>). 0 means not set.
+    /// </summary>
+    public int Par { get; init; }
+
     public required Cell Spawn { get; init; }
     public required IReadOnlyList<Cell> Goals { get; init; }
     public required IReadOnlyList<Cell> Hazards { get; init; }
