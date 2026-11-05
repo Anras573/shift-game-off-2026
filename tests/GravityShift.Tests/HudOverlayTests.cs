@@ -45,9 +45,34 @@ public class HudOverlayTests
         Assert.True(text.Transforms["Banner"].M42 < text.Transforms["Counter"].M42);
     }
 
-    private sealed class FixedViewport : IViewport
+    [Theory]
+    [InlineData(1280, 1f)]
+    [InlineData(720, 1f)]
+    [InlineData(432, 0.6f)] // portrait phone
+    [InlineData(200, 0.6f)] // never below 60%
+    public void TextScale_ShrinksOnNarrowScreens(float width, float expected) =>
+        Assert.Equal(expected, HudOverlay.TextScale(width), 3);
+
+    [Fact]
+    public void Render_UsesSmallerTextOnAPortraitPhone()
     {
-        public Vector2 Size => new(800, 600);
+        var text = new RecordingText();
+        var hud = new HudOverlay(
+            new RecordingSurface(),
+            text,
+            new FixedViewport(412, 915),
+            new FontHandle("test")
+        );
+
+        hud.Set("Title", "Counter", "");
+        hud.Render();
+
+        Assert.True(text.Sizes["Title"] < 26, $"Title size {text.Sizes["Title"]}");
+    }
+
+    private sealed class FixedViewport(float width = 800, float height = 600) : IViewport
+    {
+        public Vector2 Size => new(width, height);
         public float PixelRatio => 1f;
     }
 
@@ -82,6 +107,7 @@ public class HudOverlayTests
     {
         public readonly List<string> Drawn = [];
         public readonly Dictionary<string, Matrix4x4> Transforms = [];
+        public readonly Dictionary<string, int> Sizes = [];
 
         public void DrawText(
             string text,
@@ -89,7 +115,7 @@ public class HudOverlayTests
             FontHandle font,
             int fontSize,
             Color color
-        ) => Record(text, transform);
+        ) => Record(text, transform, fontSize);
 
         public void DrawText(
             string text,
@@ -97,12 +123,13 @@ public class HudOverlayTests
             IFontHandle font,
             int fontSize,
             Color color
-        ) => Record(text, transform);
+        ) => Record(text, transform, fontSize);
 
-        private void Record(string text, Matrix4x4 transform)
+        private void Record(string text, Matrix4x4 transform, int fontSize)
         {
             Drawn.Add(text);
             Transforms[text] = transform;
+            Sizes[text] = fontSize;
         }
     }
 }

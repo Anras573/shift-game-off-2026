@@ -18,6 +18,8 @@ Deadline: **December 1, 2026, 13:37 PST**. Aim to have something submittable a w
 - [ ] Screen shake on landings (`CameraShake`), squash/stretch tween on the parcel
 - [x] Shift counter with par per level, best per session, result banner (HUD)
 
+- [x] Mobile: on-screen touch controls (browser build), room fits portrait screens
+
 ## Week 3 (Nov 16–22): presentation
 - [ ] Art: parcel sprite with a face that looks "down", tile set for walls/chutes/shredders
 - [ ] Audio: shift whoosh, landing thud, shredder crunch, delivery ding, night-shift music
