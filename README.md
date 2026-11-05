@@ -25,6 +25,10 @@ your best for each level this session. Press R to retry for par.
 | R | Restart the level (also skips the result banner) |
 | Esc | Quit (desktop) |
 
+On phones and tablets the browser build shows on-screen buttons instead: ◀ ▶ to walk, the
+SHIFT arrows (← / → make that wall the floor, ↑ flips), restart and fullscreen. Several fingers
+work at once. Add `?touch=1` to the URL to show them on a desktop too.
+
 ## Repository layout
 
 ```
@@ -102,7 +106,8 @@ The release fails straight away (job `verify-tag`) if the tag isn't on the tip o
 tag pushed before its PR is merged can't ship old code. The error says how to move the tag.
 
 On itch.io, set the project's kind to **HTML** and tick "This file will be played in the browser"
-on the `html5` channel upload. The web build uses a relative `<base href>`, so it works from
+on the `html5` channel upload. For phones, also tick **Mobile friendly** in the embed options
+(orientation: either works; portrait puts the controls under the room, landscape beside it). The web build uses a relative `<base href>`, so it works from
 itch's sub-path.
 
 ## Updating the engine

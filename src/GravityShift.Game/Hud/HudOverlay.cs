@@ -65,12 +65,35 @@ public sealed class HudOverlay
     {
         var size = Vector2.Max(_viewport.Size, Vector2.One);
         var pixel = new Vector2(2f / size.X, 2f / size.Y);
-        var y = Margin + TitleSize;
+
+        // Shrink on narrow (portrait phone) screens so long level names still fit.
+        var scale = TextScale(size.X);
+        var title = SetSize(_title, TitleSize, scale);
+        var body = SetSize(_counter, BodySize, scale);
+        SetSize(_banner, BodySize, scale);
+
+        var y = Margin + title;
         Place(_title, y, pixel);
-        y += LineGap + BodySize;
+        y += LineGap * scale + body;
         Place(_counter, y, pixel);
-        y += LineGap * 2 + BodySize;
+        y += LineGap * 2 * scale + body;
         Place(_banner, y, pixel);
+    }
+
+    /// <summary>HUD text scale for a screen <paramref name="width"/> pixels wide.</summary>
+    internal static float TextScale(float width) => Math.Clamp(width / 720f, 0.6f, 1f);
+
+    private int SetSize(Entity entity, int baseSize, float scale)
+    {
+        var size = Math.Max(1, (int)MathF.Round(baseSize * scale));
+        var text = _world.GetComponent<Text>(entity);
+        if (text.FontSize != size)
+        {
+            text.FontSize = size;
+            _world.AddComponent(entity, text);
+        }
+
+        return size;
     }
 
     private void Place(Entity entity, float pixelsFromTop, Vector2 pixel) =>
