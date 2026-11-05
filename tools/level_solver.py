@@ -12,11 +12,17 @@ State = (row, col, gravity) while resting. Moves:
   - Q/E/W shift (cost 1): fall in the new direction until blocked; X = death, G = win.
     Mid-air: after falling >= MIDAIR_MIN cells, may shift again (cost 1) at any cell.
   - walk one cell along the floor (cost 0); stepping off a ledge falls.
+  - Belts (> < ^ v) are solid. Standing on one that runs along your floor carries you to its
+    end (belts are faster than walking, so you can't walk against them); you may shift at any
+    cell on the way. A belt running along gravity does nothing.
+  - Locks (L): no shifting while in a lock cell, including mid-air.
 Prints min shifts, whether mid-air is required, and a solution.
 """
 import heapq, sys
 
 DIRS = {"D": (1, 0), "L": (0, -1), "U": (-1, 0), "R": (0, 1)}
+BELTS = {">": (0, 1), "<": (0, -1), "^": (-1, 0), "v": (1, 0)}
+SOLID = "#" + "".join(BELTS)
 ORDER = ["D", "L", "U", "R"]
 MIDAIR_MIN = 4  # cells travelled during the 0.3 s cooldown, from rest
 
@@ -47,12 +53,20 @@ def fall(lv, r, c, g, allow_mid):
     while True:
         nr, nc = r + dr, c + dc
         t = lv.at(nr, nc)
-        if t == "#": 
+        if t in SOLID:
             yield ("rest", r, c, n); return
         r, c, n = nr, nc, n + 1
         if t == "X": yield ("dead", r, c, n); return
         if t == "G": yield ("win", r, c, n); return
         if allow_mid and n >= MIDAIR_MIN: yield ("mid", r, c, n)
+
+def belt_under(lv, r, c, g):
+    """Belt direction carrying a player resting at (r, c), or None."""
+    dr, dc = DIRS[g]
+    t = BELTS.get(lv.at(r + dr, c + dc))
+    if t is None or t in ((dr, dc), (-dr, -dc)):
+        return None
+    return t
 
 def goal_adjacent(lv, r, c, g):
     dr, dc = DIRS[g]
@@ -77,14 +91,38 @@ def solve(lv, allow_mid=True):
         r, c, g = state
         mid_starts = []
         if goal_adjacent(lv, r, c, g): return cost, path + ["WIN"]
+        shift_points = [(r, c, g, cost, path)]
+        belt = belt_under(lv, r, c, g)
+        if belt is not None:
+            # Carried along the belt; shifting is possible from any cell on the way.
+            br, bc = r, c
+            while True:
+                nr, nc = br + belt[0], bc + belt[1]
+                t = lv.at(nr, nc)
+                if t in SOLID or t == "X":
+                    break  # pressed against the end (or would die): stays here
+                if t == "G":
+                    push(cost, WIN, path + ["ride->WIN"]); break
+                br, bc = nr, nc
+                shift_points.append((br, bc, g, cost, path + [f"ride->({br},{bc})"]))
+                if belt_under(lv, br, bc, g) is None:
+                    dr, dc = DIRS[g]
+                    if lv.at(br + dr, bc + dc) in SOLID:
+                        push(cost, (br, bc, g), path + [f"ride->({br},{bc})"])
+                    else:
+                        for kind, fr, fc, _ in fall(lv, br, bc, g, allow_mid):
+                            if kind == "rest": push(cost, (fr, fc, g), path + ["ride(off end)"])
+                            elif kind == "win": push(cost, WIN, path + ["ride(off end)->WIN"])
+                            elif kind == "mid": mid_starts.append((fr, fc, g, cost, path + ["ride(off end, falling)"]))
+                    break
         sr = screen_right(g)
-        for key, (wr, wc) in (("walkR", sr), ("walkL", (-sr[0], -sr[1]))):
+        for key, (wr, wc) in (() if belt is not None else (("walkR", sr), ("walkL", (-sr[0], -sr[1])))):
             nr, nc = r + wr, c + wc
             t = lv.at(nr, nc)
-            if t in "#X": continue
+            if t in SOLID or t == "X": continue
             if t == "G": push(cost, WIN, path + [f"{key}->WIN"]); continue
             dr, dc = DIRS[g]
-            if lv.at(nr + dr, nc + dc) == "#":
+            if lv.at(nr + dr, nc + dc) in SOLID:
                 push(cost, (nr, nc, g), path + [key]); continue
             # walked off a ledge: fall, with mid-air shifts allowed on the way down
             for kind, fr, fc, _ in fall(lv, nr, nc, g, allow_mid):
@@ -93,9 +131,11 @@ def solve(lv, allow_mid=True):
                 elif kind == "dead": pass
                 elif kind == "mid": mid_starts.append((fr, fc, g, cost, path + [f"{key}(off ledge, falling)"]))
         # shifts, with mid-air chains (each extra shift costs 1)
-        stack = [(r, c, g, cost, path)] + mid_starts; mid_seen = set()
+        stack = shift_points + mid_starts; mid_seen = set()
         while stack:
             r0, c0, g0, cst, pth = stack.pop()
+            if lv.at(r0, c0) == "L":
+                continue  # gravity lock: no shifting here
             for key in "QEW":
                 g2 = shift(g0, key)
                 if g2 == g0: continue

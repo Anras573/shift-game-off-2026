@@ -68,6 +68,26 @@ public class LevelSolutionTests
                 .Shift(Keys.W) // across into the chute
                 .Settle(),
 
+        ["Goods Lift"] = bot =>
+            bot.WaitFor(c => c.Column >= 13) // the floor belt carries you to the lift
+                .Shift(Keys.E) // the belt in the right wall becomes the floor: a lift
+                .Settle(),
+
+        ["Lockdown"] = bot =>
+            bot.Shift(Keys.W) // up the free column on the right
+                .Settle()
+                .WalkInto(Keys.Right, column: 9) // upside down: along the ceiling, over the chute
+                .Shift(Keys.W) // drop through the lock band; no correcting on the way
+                .Settle(),
+
+        ["Sorting Machine"] = bot =>
+            bot.WaitFor(c => c.Column >= 13) // ride the floor belt past the locks
+                .Settle()
+                .Shift(Keys.W) // up the free end column to the ceiling belt
+                .WaitFor(c => c.Column <= 8) // ride it left...
+                .ShiftNow(Keys.W) // ...and drop into the box
+                .Settle(),
+
         ["Dead Letter Office"] = bot =>
             bot.Shift(Keys.E) // along the bottom to the inner wall
                 .Settle()
@@ -127,6 +147,30 @@ public class LevelSolutionTests
         bot.Shift(Keys.E).Settle();
 
         Assert.Equal(LevelOutcome.Shredded, bot.Outcome);
+    }
+
+    [Fact]
+    public void Lockdown_CannotCorrectInsideTheLockBand()
+    {
+        var bot = new Bot(LevelCatalog.All.Single(l => l.Name == "Lockdown"));
+
+        bot.Shift(Keys.W).Settle().WalkInto(Keys.Right, column: 11); // past the chute
+        bot.ShiftNow(Keys.W).WaitFor(c => c.Row >= 8); // falling through the lock band
+        var shifts = bot.Session.Gravity.ShiftCount;
+        bot.Wait(Tuning.ShiftCooldown).TryShift(Keys.E).Settle(); // try to steer: refused
+
+        Assert.Equal(shifts, bot.Session.Gravity.ShiftCount);
+        Assert.Equal(LevelOutcome.Shredded, bot.Outcome);
+    }
+
+    [Fact]
+    public void SortingMachine_CannotFlipUpFromUnderTheBox()
+    {
+        var bot = new Bot(LevelCatalog.All.Single(l => l.Name == "Sorting Machine"));
+
+        bot.WaitFor(c => c.Column >= 7).TryShift(Keys.W); // riding under the box, in the locks
+
+        Assert.Equal(0, bot.Session.Gravity.ShiftCount);
     }
 
     [Fact]

@@ -1,7 +1,8 @@
 # Level design notes
 
 Levels are 16×16 ASCII grids in `src/GravityShift.Game/Levels/LevelCatalog.cs`
-(`#` wall, `.` empty, `P` start, `G` chute, `X` shredder). Keep rooms square so they stay on
+(`#` wall, `.` empty, `P` start, `G` chute, `X` shredder, `>` `<` `^` `v` conveyor belt,
+`L` gravity lock). Keep rooms square so they stay on
 screen at every camera rotation.
 
 ## Workflow
@@ -43,6 +44,15 @@ These come from the numbers in `Tuning.cs` (tile 0.125, parcel 0.1 = 0.8 tiles, 
   and you start slow (Return to Sender).
 - **Being next to a chute counts.** Resting against a wall that contains a `G` delivers the
   parcel, so chutes can sit in the outer wall.
+- **Belts are one-way and fast.** At 1.3 units/s (~10 tiles/s) they beat walking, so you can't
+  walk against one. A belt only acts when it runs along your current floor, in its own world
+  direction: `>` carries you right when it's under your feet, and does nothing when it's a wall.
+  Riding is like a ledge walk-off for shifting: no cooldown, so shift points along a belt are
+  fair if they're 3+ tiles wide (~0.3 s).
+- **Never let a belt carry the parcel into a lock it can't leave.** It ends up pinned with no
+  shift available, and the only way out is R. Keep the end of a belt run outside any lock.
+- **Locks must change the answer.** Solve the room with the `L`s removed (replace them with
+  `.`); if the minimum doesn't drop, the locks are decoration.
 - **Shredders are forgiving, chutes are generous.** Their triggers are 0.7 and 1.2 tiles, so
   brushing past a shredder diagonally is safe.
 
@@ -57,4 +67,7 @@ These come from the numbers in `Tuning.cs` (tile 0.125, parcel 0.1 = 0.8 tiles, 
 | 5 | This Side Up | 2 | no | A wall lines you up with the box opening |
 | 6 | Express Post | 3 | yes | Fly between two shredder shelves and drop into the chute |
 | 7 | Shredder Alley | 3 | no | Work round inside a box lined with shredders |
-| 8 | Dead Letter Office | 4 | no | Finale maze of ledges and pockets |
+| 8 | Goods Lift | 1 | no | Ride the floor belt, shift onto the wall belt: it's a lift |
+| 9 | Lockdown | 2 | no | Line up above the chute before dropping through the lock band |
+| 10 | Sorting Machine | 2 | no | Locks stop you flipping up into the box; reach the ceiling belt |
+| 11 | Dead Letter Office | 4 | no | Finale maze of ledges and pockets |

@@ -26,6 +26,9 @@ public sealed class GravityShiftSystem(
     /// <summary>Raised after every successful shift, e.g. for a sound effect.</summary>
     public event Action<GravityDirection>? Shifted;
 
+    /// <summary>Raised when a shift is refused because the parcel is in a gravity lock.</summary>
+    public event Action? ShiftLocked;
+
     /// <summary>Reads one-shot key presses. Call once per rendered frame, not per physics step.</summary>
     public void HandleInput()
     {
@@ -49,6 +52,11 @@ public sealed class GravityShiftSystem(
     {
         if (gravity.Cooldown > 0f || newDirection == gravity.Direction)
             return false;
+        if (gravity.IsLocked)
+        {
+            ShiftLocked?.Invoke();
+            return false;
+        }
 
         gravity.Direction = newDirection;
         gravity.Cooldown = Tuning.ShiftCooldown;

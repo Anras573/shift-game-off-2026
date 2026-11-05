@@ -13,8 +13,8 @@ Deadline: **December 1, 2026, 13:37 PST**. Aim to have something submittable a w
 ## Week 2 (Nov 9–15): content and feel
 - [x] 8 levels, each with a real-physics play-through test and a solver check (`docs/LEVEL_DESIGN.md`)
 - [ ] More levels using the new pieces below (Tiled via `TiledMapLoader` if the ASCII format gets limiting)
-- [ ] New pieces: conveyor belts (kinematic `PlatformPath`), crates the parcel can push,
-      fragile crates that break on hard landings, "stamp" zones that lock gravity
+- [x] New pieces: conveyor belts and gravity locks, with 3 levels using them (11 total)
+- [ ] More pieces: crates the parcel can push, fragile crates that break on hard landings
 - [ ] Screen shake on landings (`CameraShake`), squash/stretch tween on the parcel
 - [x] Shift counter with par per level, best per session, result banner (HUD)
 

@@ -173,6 +173,78 @@ public static class LevelCatalog
             ],
             par: 3
         ),
+        // Teaches belts: they carry you, and a belt in a wall becomes a lift once that
+        // wall is the floor. Ride to the end, shift onto the lift, ride up to the chute.
+        LevelParser.Parse(
+            "Goods Lift",
+            [
+                "################",
+                "#.............G#",
+                "#.............^#",
+                "#.............^#",
+                "#.............^#",
+                "#.............^#",
+                "#.............^#",
+                "#.............^#",
+                "#.............^#",
+                "#.............^#",
+                "#.............^#",
+                "#.............^#",
+                "#.............^#",
+                "#P............^#",
+                "#>>>>>>>>>>>>>^#",
+                "################",
+            ],
+            par: 1
+        ),
+        // Teaches gravity locks: no shifting in the purple band, so line up above the
+        // chute before dropping through it.
+        LevelParser.Parse(
+            "Lockdown",
+            [
+                "################",
+                "#..............#",
+                "########.......#",
+                "#..............#",
+                "#..............#",
+                "#..............#",
+                "#..............#",
+                "#LLLLLLLLLLLLL.#",
+                "#LLLLLLLLLLLLL.#",
+                "#LLLLLLLLLLLLL.#",
+                "#LLLLLLLLLLLLL.#",
+                "#LLLLLLLLLLLLL.#",
+                "#LLLLLLLLLLLLL.#",
+                "#LLLLLLLLLLLLLP#",
+                "#XXXXXXX..XXXX##",
+                "########GG######",
+            ],
+            par: 2
+        ),
+        // Belts round the room. The chute sits inside an open-ended box: you can't flip up
+        // into it from the floor belt (locks), so reach the ceiling belt and drop in.
+        LevelParser.Parse(
+            "Sorting Machine",
+            [
+                "################",
+                "##<<<<<<<<<<<<##",
+                "#v............^#",
+                "#v............^#",
+                "#v...#....#...^#",
+                "#v...#....#...^#",
+                "#v...#....#...^#",
+                "#v...#....#...^#",
+                "#v...#GGGG#...^#",
+                "#v...#....#...^#",
+                "#v...#....#...^#",
+                "#v...#....#...^#",
+                "#v..LLLLLLLLL.^#",
+                "#vP.LLLLLLLLL.^#",
+                "##>>>>>>>>>>>>##",
+                "################",
+            ],
+            par: 2
+        ),
         // Finale: a sorting maze of ledges and pockets; at least four shifts.
         LevelParser.Parse(
             "Dead Letter Office",
