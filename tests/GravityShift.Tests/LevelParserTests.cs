@@ -38,6 +38,28 @@ public class LevelParserTests
         Assert.Throws<FormatException>(() => LevelParser.Parse("bad", rows.Split('|')));
 
     [Fact]
+    public void Parse_ReadsBeltsAndLocks()
+    {
+        var level = LevelParser.Parse("t", ["><^v", "LPG#"]);
+
+        Assert.Equal(System.Numerics.Vector2.UnitX, level.BeltAt(new Cell(0, 0)));
+        Assert.Equal(-System.Numerics.Vector2.UnitX, level.BeltAt(new Cell(1, 0)));
+        Assert.Equal(System.Numerics.Vector2.UnitY, level.BeltAt(new Cell(2, 0)));
+        Assert.Equal(-System.Numerics.Vector2.UnitY, level.BeltAt(new Cell(3, 0)));
+        Assert.Null(level.BeltAt(new Cell(3, 1)));
+        Assert.False(level.IsSolid(0, 0)); // belts get their own colliders, not wall tiles
+        Assert.Equal([new Cell(0, 1)], level.Locks);
+    }
+
+    [Fact]
+    public void CellAt_IsTheInverseOfCellCenter()
+    {
+        var level = LevelCatalog.All[0];
+        foreach (var cell in new[] { new Cell(0, 0), new Cell(7, 3), new Cell(15, 15) })
+            Assert.Equal(cell, level.CellAt(level.CellCenter(cell)));
+    }
+
+    [Fact]
     public void Parse_StoresParAndRejectsNegativePar()
     {
         Assert.Equal(3, LevelParser.Parse("t", ["PG"], par: 3).Par);

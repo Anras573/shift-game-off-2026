@@ -8,7 +8,9 @@ built with the [Yaeger](https://github.com/Anras573/Yaeger) engine.
 
 ## How to play
 
-Reach the yellow delivery chute without touching the red shredders. Every gravity shift
+Reach the yellow delivery chute without touching the red shredders. Teal conveyor belts carry
+you along them (only when they run along your current floor, so a belt in a wall becomes a
+lift once that wall is the floor), and you can't shift while inside a purple gravity lock. Every gravity shift
 counts: the HUD shows your shifts against the level's **par** (the fewest possible), and
 your best for each level this session. Press R to retry for par.
 
@@ -68,6 +70,8 @@ Levels live in `src/GravityShift.Game/Levels/LevelCatalog.cs` as 16×16 ASCII gr
 | `P` | Parcel spawn (exactly one) |
 | `G` | Delivery chute / goal (one or more) |
 | `X` | Shredder / hazard |
+| `>` `<` `^` `v` | Conveyor belt (solid), pushing that way on screen |
+| `L` | Gravity lock: no shifting while inside |
 
 See [`docs/LEVEL_DESIGN.md`](docs/LEVEL_DESIGN.md) for the workflow and the design rules:
 check the room with `python3 tools/level_solver.py "Name"`, add a play-through to

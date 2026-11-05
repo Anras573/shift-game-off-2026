@@ -21,6 +21,12 @@ public static class Tuning
     /// <summary>Sideways ("walking") speed relative to the current floor, in units/s.</summary>
     public const float WalkSpeed = 0.9f;
 
+    /// <summary>
+    /// Conveyor belt speed, in units/s. Faster than <see cref="WalkSpeed"/>, so belts are
+    /// one-way: walking against one only slows you down.
+    /// </summary>
+    public const float BeltSpeed = 1.3f;
+
     /// <summary>Seconds after a gravity shift before another one is accepted.</summary>
     public const float ShiftCooldown = 0.3f;
 

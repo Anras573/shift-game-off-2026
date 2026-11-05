@@ -8,3 +8,5 @@ artifacts/
 .idea/
 TestResults/
 *.zip
+__pycache__/
+*.pyc

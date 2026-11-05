@@ -11,6 +11,8 @@ namespace GravityShift.Levels;
 /// <item><c>P</c> parcel (player) spawn, exactly one</item>
 /// <item><c>G</c> delivery chute (goal), at least one</item>
 /// <item><c>X</c> shredder (hazard)</item>
+/// <item><c>&gt;</c> <c>&lt;</c> <c>^</c> <c>v</c> conveyor belt (solid), pushing that way on screen</item>
+/// <item><c>L</c> gravity lock: no shifting inside</item>
 /// </list>
 /// Rows are listed top to bottom and must all be the same length.
 /// </remarks>
@@ -31,6 +33,8 @@ public static class LevelParser
         Cell? spawn = null;
         var goals = new List<Cell>();
         var hazards = new List<Cell>();
+        var belts = new Dictionary<Cell, System.Numerics.Vector2>();
+        var locks = new List<Cell>();
 
         for (var row = 0; row < height; row++)
         {
@@ -62,6 +66,21 @@ public static class LevelParser
                     case 'X':
                         hazards.Add(cell);
                         break;
+                    case '>':
+                        belts[cell] = System.Numerics.Vector2.UnitX;
+                        break;
+                    case '<':
+                        belts[cell] = -System.Numerics.Vector2.UnitX;
+                        break;
+                    case '^':
+                        belts[cell] = System.Numerics.Vector2.UnitY;
+                        break;
+                    case 'v':
+                        belts[cell] = -System.Numerics.Vector2.UnitY;
+                        break;
+                    case 'L':
+                        locks.Add(cell);
+                        break;
                     default:
                         throw new FormatException(
                             $"Level '{name}' has unknown tile '{line[column]}' at ({column}, {row})."
@@ -85,6 +104,8 @@ public static class LevelParser
             Spawn = spawn.Value,
             Goals = goals,
             Hazards = hazards,
+            Belts = belts,
+            Locks = locks,
         };
     }
 }

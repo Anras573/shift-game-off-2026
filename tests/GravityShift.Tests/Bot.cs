@@ -54,6 +54,14 @@ internal sealed class Bot
         return Wait(Tuning.ShiftCooldown);
     }
 
+    /// <summary>Tap a shift key without requiring it to be accepted (e.g. inside a lock).</summary>
+    public Bot TryShift(Keys key)
+    {
+        _input.Tap(key);
+        Step();
+        return this;
+    }
+
     /// <summary>Shift on exactly this frame, e.g. in mid-air.</summary>
     public Bot ShiftNow(Keys key)
     {

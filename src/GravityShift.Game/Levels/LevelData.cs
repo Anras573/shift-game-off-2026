@@ -25,7 +25,25 @@ public sealed class LevelData
     public required IReadOnlyList<Cell> Goals { get; init; }
     public required IReadOnlyList<Cell> Hazards { get; init; }
 
+    /// <summary>Conveyor belt tiles (solid) and the world direction each one pushes.</summary>
+    public IReadOnlyDictionary<Cell, Vector2> Belts { get; init; } =
+        new Dictionary<Cell, Vector2>();
+
+    /// <summary>Gravity-lock cells: no shifting while the parcel overlaps one.</summary>
+    public IReadOnlyList<Cell> Locks { get; init; } = [];
+
     public bool IsSolid(int column, int row) => Solid[row * Width + column];
+
+    /// <summary>The belt direction at <paramref name="cell"/>, or null if it isn't a belt.</summary>
+    public Vector2? BeltAt(Cell cell) =>
+        Belts.TryGetValue(cell, out var direction) ? direction : null;
+
+    /// <summary>The grid cell containing a world position (may be outside the level).</summary>
+    public Cell CellAt(Vector2 world)
+    {
+        var local = (world - Origin) / Tuning.TileSize;
+        return new Cell((int)MathF.Floor(local.X), Height - 1 - (int)MathF.Floor(local.Y));
+    }
 
     /// <summary>World size of the whole level.</summary>
     public Vector2 WorldSize => new Vector2(Width, Height) * Tuning.TileSize;
