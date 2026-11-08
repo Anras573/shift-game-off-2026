@@ -18,7 +18,8 @@ internal sealed class Bot
 
     private readonly FakeInput _input = new();
 
-    public Bot(LevelData level) => Session = new LevelSession(level, _input);
+    public Bot(LevelData level, bool reducedMotion = false) =>
+        Session = new LevelSession(level, _input, reducedMotion: reducedMotion);
 
     public LevelSession Session { get; }
     public LevelOutcome Outcome => Session.Outcome;

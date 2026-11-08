@@ -1,5 +1,6 @@
 using System.Numerics;
 using GravityShift.Components;
+using GravityShift.Feel;
 using GravityShift.Gravity;
 using GravityShift.Levels;
 using GravityShift.Systems;
@@ -35,6 +36,7 @@ public sealed class LevelSession
     private readonly CameraRotationSystem _camera;
     private readonly LevelRulesSystem _rules;
     private readonly BeltMarkerSystem _beltMarkers;
+    private readonly FeelSystem _feel;
     private readonly UnifiedRenderSystem? _render;
     private readonly IViewport? _viewport;
     private float _accumulator;
@@ -43,7 +45,8 @@ public sealed class LevelSession
         LevelData level,
         IInputState input,
         IRenderSurface? renderSurface = null,
-        IViewport? viewport = null
+        IViewport? viewport = null,
+        bool reducedMotion = false
     )
     {
         Level = level;
@@ -62,8 +65,19 @@ public sealed class LevelSession
         _ = new GravityLockSystem(World, Gravity, _controller);
         _beltMarkers = new BeltMarkerSystem(World);
         _viewport = viewport;
-        _camera = new CameraRotationSystem(World, Gravity, viewport);
+        var shake = new ScreenShake(enabled: !reducedMotion);
+        _camera = new CameraRotationSystem(World, Gravity, viewport, shake);
         _rules = new LevelRulesSystem(World, level, _controller);
+        _feel = new FeelSystem(
+            World,
+            Gravity,
+            shake,
+            () => _rules.Outcome,
+            () => _camera.Rotation,
+            ParcelColor,
+            LockColor
+        );
+        _gravityShift.ShiftLocked += _feel.OnShiftLocked;
 
         if (renderSurface is not null)
             _render = new UnifiedRenderSystem(renderSurface, null, World, viewport);
@@ -76,6 +90,10 @@ public sealed class LevelSession
     public GravityState Gravity { get; }
     public LevelOutcome Outcome => _rules.Outcome;
     public GravityShiftSystem GravityShift => _gravityShift;
+    public FeelSystem Feel => _feel;
+
+    /// <summary>Raised when the parcel lands, with its speed along gravity just before impact.</summary>
+    public event Action<float>? Landed;
 
     /// <summary>Advances the level by one rendered frame of <paramref name="deltaTime"/> seconds.</summary>
     public void Update(float deltaTime)
@@ -97,6 +115,7 @@ public sealed class LevelSession
 
         _camera.Update(deltaTime);
         _beltMarkers.Update(deltaTime);
+        _feel.Update(deltaTime);
     }
 
     /// <summary>Runs exactly one fixed simulation step. Public for deterministic tests.</summary>
@@ -108,11 +127,33 @@ public sealed class LevelSession
         _gravityShift.Update(step);
         _movement.Update(step);
         _physics.Update(step);
+        var (wasGrounded, fallSpeed) = PlayerFall();
         _controller.Update(step);
+        if (!wasGrounded && PlayerFall().Grounded)
+        {
+            _feel.OnLanded(fallSpeed);
+            Landed?.Invoke(fallSpeed);
+        }
         _rules.Update(step);
     }
 
     public void Render() => _render?.Render();
+
+    private (bool Grounded, float FallSpeed) PlayerFall()
+    {
+        foreach (
+            var (_, _, controller, velocity) in World.Query<
+                Player,
+                CharacterController2D,
+                Velocity2D
+            >()
+        )
+            return (
+                controller.IsGrounded,
+                Vector2.Dot(velocity.Linear, Gravity.Direction.ToVector())
+            );
+        return (false, 0f);
+    }
 
     private void Build()
     {
@@ -171,8 +212,15 @@ public sealed class LevelSession
         );
         World.AddComponent(player, Velocity2D.Zero);
         World.AddComponent(player, new CharacterController2D(Tuning.PlayerSize, Tuning.PlayerSize));
-        World.AddComponent(player, new Sprite(IRenderSurface.SolidTexturePath, ParcelColor));
-        World.AddComponent(player, new RenderLayer(3));
+
+        // What you see: a separate sprite that follows the body and squashes (FeelSystem).
+        var parcel = World.CreateEntity("parcel");
+        World.AddComponent(
+            parcel,
+            new Transform2D(level.CellCenter(level.Spawn), scale: new Vector2(Tuning.PlayerSize))
+        );
+        World.AddComponent(parcel, new Sprite(IRenderSurface.SolidTexturePath, ParcelColor));
+        World.AddComponent(parcel, new RenderLayer(3));
 
         var camera = World.CreateEntity("camera");
         World.AddComponent(
