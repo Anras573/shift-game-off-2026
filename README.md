@@ -25,6 +25,8 @@ your best for each level this session. Press R to retry for par.
 | R | Restart the level (also skips the result banner) |
 | Esc | Quit (desktop) |
 
+Screen shake is off when your system asks for reduced motion, or with `?shake=0` in the URL.
+
 On phones and tablets the browser build shows on-screen buttons instead: ◀ ▶ to walk, the
 SHIFT arrows (← / → make that wall the floor, ↑ flips), restart and fullscreen. Several fingers
 work at once. Add `?touch=1` to the URL to show them on a desktop too.
@@ -35,6 +37,7 @@ work at once. Add `?touch=1` to the URL to show them on a desktop too.
 engine/Yaeger/             Yaeger engine (git submodule, pinned to a commit)
 src/GravityShift.Game/     All gameplay. References Yaeger.Core only, so it runs on both hosts.
   Hud/                     Shift counter / par / result banner, drawn in an overlay pass
+  Feel/ + FeelSystem       Squash & stretch, screen shake, lock flash, delivery/shred animations
   Gravity/                 GravityDirection maths + per-level GravityState
   Levels/                  ASCII level format, parser and the level catalog
   Systems/                 Gravity shifting, walking, camera rotation, win/lose rules

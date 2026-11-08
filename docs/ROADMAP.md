@@ -15,7 +15,8 @@ Deadline: **December 1, 2026, 13:37 PST**. Aim to have something submittable a w
 - [ ] More levels using the new pieces below (Tiled via `TiledMapLoader` if the ASCII format gets limiting)
 - [x] New pieces: conveyor belts and gravity locks, with 3 levels using them (11 total)
 - [ ] More pieces: crates the parcel can push, fragile crates that break on hard landings
-- [ ] Screen shake on landings (`CameraShake`), squash/stretch tween on the parcel
+- [x] Game feel: squash & stretch, landing shake (off for reduced motion), lock flash,
+      delivery/shred animations
 - [x] Shift counter with par per level, best per session, result banner (HUD)
 
 - [x] Mobile: on-screen touch controls (browser build), room fits portrait screens

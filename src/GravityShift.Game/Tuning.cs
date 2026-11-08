@@ -42,6 +42,42 @@ public static class Tuning
     /// <summary>Seconds the "Shredded" / "Lost" banner shows before the level restarts.</summary>
     public const float FailedPause = 0.8f;
 
+    // ---- Game feel (visual only; physics is unaffected) ----
+
+    /// <summary>How flat the parcel squashes on the hardest landing (0.35 = 35% shorter).</summary>
+    public const float SquashMax = 0.35f;
+
+    /// <summary>How tall the parcel stretches at terminal velocity.</summary>
+    public const float StretchMax = 0.18f;
+
+    /// <summary>Squash spring stiffness and damping: a quick, slightly bouncy recovery.</summary>
+    public const float SquashStiffness = 320f;
+
+    public const float SquashDamping = 16f;
+
+    /// <summary>Landings slower than this (units/s) don't shake the screen.</summary>
+    public const float ShakeLandingThreshold = 1.2f;
+
+    /// <summary>Trauma added by a landing at terminal velocity.</summary>
+    public const float ShakeLandingTrauma = 0.55f;
+
+    /// <summary>Trauma added when a shift is refused inside a gravity lock.</summary>
+    public const float ShakeLockedTrauma = 0.3f;
+
+    /// <summary>Trauma added when the parcel is shredded.</summary>
+    public const float ShakeShreddedTrauma = 0.8f;
+
+    /// <summary>Trauma lost per second.</summary>
+    public const float ShakeDecay = 1.8f;
+
+    /// <summary>Camera offset (world units) and roll (radians) at full trauma.</summary>
+    public const float ShakeMaxOffset = 0.05f;
+
+    public const float ShakeMaxAngle = 0.035f;
+
+    /// <summary>Seconds a gravity-lock zone flashes after refusing a shift.</summary>
+    public const float LockFlashTime = 0.3f;
+
     /// <summary>Fixed simulation step, in seconds. Keeps physics frame-rate independent.</summary>
     public const float FixedTimeStep = 1f / 120f;
 

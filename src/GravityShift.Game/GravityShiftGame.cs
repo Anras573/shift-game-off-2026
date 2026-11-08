@@ -21,6 +21,7 @@ public sealed class GravityShiftGame
     private readonly IReadOnlyList<LevelData> _levels;
     private readonly int?[] _bestShifts;
     private readonly HudOverlay? _hud;
+    private readonly bool _reducedMotion;
 
     // Set while the result banner is showing; the level changes when the timer runs out.
     private float _resultTimer;
@@ -32,9 +33,11 @@ public sealed class GravityShiftGame
         IViewport? viewport = null,
         IReadOnlyList<LevelData>? levels = null,
         ITextRenderSurface? textSurface = null,
-        IFontHandle? hudFont = null
+        IFontHandle? hudFont = null,
+        bool reducedMotion = false
     )
     {
+        _reducedMotion = reducedMotion;
         _input = input;
         _renderSurface = renderSurface;
         _viewport = viewport;
@@ -144,6 +147,6 @@ public sealed class GravityShiftGame
     private LevelSession CreateSession(int index)
     {
         LevelIndex = index;
-        return new LevelSession(_levels[index], _input, _renderSurface, _viewport);
+        return new LevelSession(_levels[index], _input, _renderSurface, _viewport, _reducedMotion);
     }
 }

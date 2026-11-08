@@ -1,4 +1,5 @@
-using GravityShift.Components;
+using System.Numerics;
+using GravityShift.Feel;
 using GravityShift.Gravity;
 using Yaeger.ECS;
 using Yaeger.Graphics;
@@ -8,38 +9,40 @@ using Yaeger.Systems;
 namespace GravityShift.Systems;
 
 /// <summary>
-/// Eases the camera so the current gravity always points down on screen, keeps the parcel
-/// sprite upright relative to the camera, and zooms so the square room fits the screen in
-/// portrait as well as landscape. Runs once per rendered frame.
+/// Eases the camera so the current gravity always points down on screen, zooms so the square
+/// room fits the screen in portrait as well as landscape, and adds screen shake on top.
+/// Runs once per rendered frame.
 /// </summary>
 public sealed class CameraRotationSystem(
     World world,
     GravityState gravity,
-    IViewport? viewport = null
+    IViewport? viewport = null,
+    ScreenShake? shake = null
 ) : IUpdateSystem
 {
+    private float? _rotation;
+
+    /// <summary>The eased camera rotation, without shake: what "upright" means on screen.</summary>
+    public float Rotation => _rotation ?? gravity.Direction.CameraRotation();
+
     public void Update(float deltaTime)
     {
         var target = gravity.Direction.CameraRotation();
         var blend = 1f - MathF.Exp(-Tuning.CameraRotationSmoothing * deltaTime);
-        float? rotation = null;
+        var current = _rotation ?? target;
+        _rotation = current + ShortestAngle(current, target) * blend;
 
         foreach (var (entity, camera) in world.GetStore<Camera2D>().All().ToList())
         {
-            var current = camera.Rotation;
-            var next = current + ShortestAngle(current, target) * blend;
-            world.AddComponent(entity, camera with { Rotation = next, Zoom = FitZoom(viewport) });
-            rotation ??= next;
-        }
-
-        if (rotation is null)
-            return;
-
-        foreach (var (entity, _, transform) in world.Query<Player, Transform2D>().ToList())
-        {
-            var upright = transform;
-            upright.Rotation = rotation.Value;
-            world.AddComponent(entity, upright);
+            world.AddComponent(
+                entity,
+                camera with
+                {
+                    Position = shake?.Offset ?? Vector2.Zero,
+                    Rotation = _rotation.Value + (shake?.Angle ?? 0f),
+                    Zoom = FitZoom(viewport),
+                }
+            );
         }
     }
 

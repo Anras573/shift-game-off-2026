@@ -1,4 +1,5 @@
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 @implements IDisposable
 
 <canvas id="yaeger-canvas" tabindex="0"></canvas>
@@ -29,17 +30,26 @@
         // HUD font (DejaVu Sans Bold, see fonts/LICENSE-DejaVu.txt), registered via FontFace.
         await BrowserTextRenderSurface.LoadFontAsync(HudFontFamily, "fonts/DejaVuSans-Bold.ttf");
 
+        // No screen shake for players who ask for reduced motion (OS setting), or with ?shake=0.
+        var query = System.Web.HttpUtility.ParseQueryString(new Uri(Nav.Uri).Query);
+        var reducedMotion =
+            query["shake"] == "0"
+            || await JS.InvokeAsync<bool>(
+                "eval",
+                "window.matchMedia('(prefers-reduced-motion: reduce)').matches"
+            );
+
         var timeSource = new BrowserTimeSource();
         var game = new GravityShiftGame(
             new BrowserInputState(),
             _renderSurface,
             _renderSurface,
             textSurface: new BrowserTextRenderSurface(_renderSurface),
-            hudFont: new Yaeger.Graphics.FontHandle(HudFontFamily)
+            hudFont: new Yaeger.Graphics.FontHandle(HudFontFamily),
+            reducedMotion: reducedMotion
         );
 
         // Playtesting shortcut: ?level=5 starts on the fifth level.
-        var query = System.Web.HttpUtility.ParseQueryString(new Uri(Nav.Uri).Query);
         if (int.TryParse(query["level"], out var level) && level >= 1 && level <= game.LevelCount)
             game.LoadLevel(level - 1);
 
