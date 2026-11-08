@@ -102,8 +102,10 @@ To release, **merge the PR first**, then tag the latest `main`:
 git pull && git tag -a v0.4.0 -m "..." && git push origin v0.4.0
 ```
 
-The release fails straight away (job `verify-tag`) if the tag isn't on the tip of `main`, so a
-tag pushed before its PR is merged can't ship old code. The error says how to move the tag.
+The release fails straight away (job `verify-tag`) if the tag isn't on the tip of `main`, or if
+a pull request into `main` is still open (a tag pushed before merging sits on the old tip, so the
+first check alone can't catch it). The error says how to move the tag. To release on purpose
+with a PR open, run the Release workflow manually from the Actions tab.
 
 On itch.io, set the project's kind to **HTML** and tick "This file will be played in the browser"
 on the `html5` channel upload. For phones, also tick **Mobile friendly** in the embed options
