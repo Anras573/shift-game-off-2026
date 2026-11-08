@@ -36,6 +36,7 @@ public sealed class LevelSession
     private readonly LevelRulesSystem _rules;
     private readonly BeltMarkerSystem _beltMarkers;
     private readonly UnifiedRenderSystem? _render;
+    private readonly IViewport? _viewport;
     private float _accumulator;
 
     public LevelSession(
@@ -60,7 +61,8 @@ public sealed class LevelSession
         _movement = new PlayerMovementSystem(World, Gravity, input, level);
         _ = new GravityLockSystem(World, Gravity, _controller);
         _beltMarkers = new BeltMarkerSystem(World);
-        _camera = new CameraRotationSystem(World, Gravity);
+        _viewport = viewport;
+        _camera = new CameraRotationSystem(World, Gravity, viewport);
         _rules = new LevelRulesSystem(World, level, _controller);
 
         if (renderSurface is not null)
@@ -175,7 +177,11 @@ public sealed class LevelSession
         var camera = World.CreateEntity("camera");
         World.AddComponent(
             camera,
-            new Camera2D(Vector2.Zero, Tuning.CameraZoom, Gravity.Direction.CameraRotation())
+            new Camera2D(
+                Vector2.Zero,
+                CameraRotationSystem.FitZoom(_viewport),
+                Gravity.Direction.CameraRotation()
+            )
         );
     }
 
