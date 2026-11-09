@@ -23,6 +23,7 @@ your best for each level this session. Press R to retry for par.
 | E (or X) | Shift gravity: the **right** wall becomes the floor |
 | W, ↑ or Space | Flip gravity: the **ceiling** becomes the floor |
 | R | Restart the level (also skips the result banner) |
+| M | Mute / unmute sound |
 | Esc | Quit (desktop) |
 
 Screen shake is off when your system asks for reduced motion, or with `?shake=0` in the URL.
@@ -137,6 +138,20 @@ The PNGs are committed, so building the game doesn't need Python. Any PNG can be
 hand-made art of the same size and layout: `walls.png` is a 4×4 sheet indexed by which sides
 face the room (up 1, right 2, down 4, left 8), `belts.png` is horizontal then vertical, and
 `background.png` holds two alternating tiles. The desktop build copies the same files.
+
+## Audio
+
+Sound effects (`.wav`) and the music loop are synthesized by `tools/generate_audio.py` (needs
+numpy, and ffmpeg for the music) into `src/GravityShift.Web/wwwroot/audio`:
+
+```bash
+python3 tools/generate_audio.py
+```
+
+The music ships as `music.ogg` (desktop streaming and most browsers) plus `music.m4a`, which the
+browser uses where it can't play Ogg (Safari). The files are committed, and any of them can be
+replaced with a recording of the same name. Browsers only start sound after the first key press
+or tap.
 
 ## Third-party assets
 

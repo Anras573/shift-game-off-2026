@@ -1,4 +1,6 @@
 using GravityShift;
+using GravityShift.Audio;
+using Yaeger.Audio;
 using Yaeger.Font;
 using Yaeger.Input;
 using Yaeger.Platform;
@@ -23,12 +25,26 @@ var hudFont = fonts.Load(
     Path.Combine(AppContext.BaseDirectory, "Assets", "Fonts", "DejaVuSans-Bold.ttf")
 );
 
+// Without an audio device the window falls back to a silent context, so this always works;
+// a missing or broken sound file just means playing without sound.
+using var audio = new NativeAudioOutput(window.AudioContext);
+GameSounds? sounds = null;
+try
+{
+    sounds = await GameSounds.LoadAsync(audio);
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"Sound disabled: {ex.Message}");
+}
+
 var game = new GravityShiftGame(
     new NativeInputState(),
     renderer,
     window,
     textSurface: textRenderer,
-    hudFont: hudFont
+    hudFont: hudFont,
+    sounds: sounds
 );
 
 game.LevelStarted += level => Console.WriteLine($"Level: {level.Name} (par {level.Par})");
@@ -40,6 +56,6 @@ window.OnUpdate += delta => game.Update((float)delta);
 window.OnRender += _ => game.Render();
 
 Console.WriteLine(
-    "Gravity Shift: A/D or ←/→ walk · Q/E shift gravity · W/↑/Space flip · R restart"
+    "Gravity Shift: A/D or ←/→ walk · Q/E shift gravity · W/↑/Space flip · R restart · M mute"
 );
 window.Run();

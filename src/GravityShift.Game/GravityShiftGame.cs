@@ -1,3 +1,4 @@
+using GravityShift.Audio;
 using GravityShift.Hud;
 using GravityShift.Levels;
 using GravityShift.Systems;
@@ -22,6 +23,7 @@ public sealed class GravityShiftGame
     private readonly int?[] _bestShifts;
     private readonly HudOverlay? _hud;
     private readonly bool _reducedMotion;
+    private readonly GameSounds? _sounds;
 
     // Set while the result banner is showing; the level changes when the timer runs out.
     private float _resultTimer;
@@ -34,10 +36,12 @@ public sealed class GravityShiftGame
         IReadOnlyList<LevelData>? levels = null,
         ITextRenderSurface? textSurface = null,
         IFontHandle? hudFont = null,
-        bool reducedMotion = false
+        bool reducedMotion = false,
+        GameSounds? sounds = null
     )
     {
         _reducedMotion = reducedMotion;
+        _sounds = sounds;
         _input = input;
         _renderSurface = renderSurface;
         _viewport = viewport;
@@ -55,6 +59,7 @@ public sealed class GravityShiftGame
             _hud = new HudOverlay(renderSurface, textSurface, viewport, hudFont);
 
         Session = CreateSession(0);
+        _sounds?.StartMusic();
     }
 
     public int LevelIndex { get; private set; }
@@ -73,6 +78,9 @@ public sealed class GravityShiftGame
     /// <summary>The HUD, when the host provided text rendering.</summary>
     public HudOverlay? Hud => _hud;
 
+    /// <summary>Sound effects and music, when the host provided audio.</summary>
+    public GameSounds? Sounds => _sounds;
+
     /// <summary>Raised when a level starts (including restarts).</summary>
     public event Action<LevelData>? LevelStarted;
 
@@ -81,6 +89,10 @@ public sealed class GravityShiftGame
 
     public void Update(float deltaTime)
     {
+        if (_input.WasKeyPressed(Keys.M))
+            _sounds?.ToggleMute();
+        _sounds?.Update(deltaTime);
+
         if (_input.WasKeyPressed(Keys.R))
         {
             LoadLevel(LevelIndex);
@@ -134,6 +146,7 @@ public sealed class GravityShiftGame
         }
 
         Banner = HudText.Result(outcome, Shifts, level.Par);
+        _sounds?.LevelEnded(outcome);
         LevelEnded?.Invoke(level, outcome, Shifts);
     }
 
@@ -147,6 +160,19 @@ public sealed class GravityShiftGame
     private LevelSession CreateSession(int index)
     {
         LevelIndex = index;
-        return new LevelSession(_levels[index], _input, _renderSurface, _viewport, _reducedMotion);
+        var session = new LevelSession(
+            _levels[index],
+            _input,
+            _renderSurface,
+            _viewport,
+            _reducedMotion
+        );
+        if (_sounds is { } sounds)
+        {
+            session.GravityShift.Shifted += sounds.Shifted;
+            session.GravityShift.ShiftLocked += sounds.ShiftLocked;
+            session.Landed += sounds.Landed;
+        }
+        return session;
     }
 }
