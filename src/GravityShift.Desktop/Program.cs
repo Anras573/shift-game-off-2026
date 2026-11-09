@@ -2,7 +2,6 @@ using GravityShift;
 using GravityShift.Audio;
 using Yaeger.Audio;
 using Yaeger.Font;
-using Yaeger.Input;
 using Yaeger.Platform;
 using Yaeger.Rendering;
 using Yaeger.Windowing;
@@ -44,18 +43,20 @@ var game = new GravityShiftGame(
     window,
     textSurface: textRenderer,
     hudFont: hudFont,
-    sounds: sounds
+    sounds: sounds,
+    startScreen: GravityShift.Menus.GameScreen.Title
 );
 
 game.LevelStarted += level => Console.WriteLine($"Level: {level.Name} (par {level.Par})");
 game.LevelEnded += (level, outcome, shifts) =>
     Console.WriteLine($"{level.Name}: {outcome} in {shifts} shift(s)");
 
-Keyboard.AddKeyDown(Keys.Escape, window.Close);
+// Esc backs out: game → level select → title → quit.
+game.QuitRequested += window.Close;
 window.OnUpdate += delta => game.Update((float)delta);
 window.OnRender += _ => game.Render();
 
 Console.WriteLine(
-    "Gravity Shift: A/D or ←/→ walk · Q/E shift gravity · W/↑/Space flip · R restart · M mute"
+    "Gravity Shift: A/D or ←/→ walk · Q/E shift gravity · W/↑/Space flip · R restart · M mute · Esc menu"
 );
 window.Run();

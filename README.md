@@ -24,7 +24,7 @@ your best for each level this session. Press R to retry for par.
 | W, ↑ or Space | Flip gravity: the **ceiling** becomes the floor |
 | R | Restart the level (also skips the result banner) |
 | M | Mute / unmute sound |
-| Esc | Quit (desktop) |
+| Esc | Back: level → level select → title (→ quit on desktop) |
 
 Screen shake is off when your system asks for reduced motion, or with `?shake=0` in the URL.
 

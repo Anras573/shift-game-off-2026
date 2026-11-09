@@ -72,7 +72,9 @@ public class GravityShiftGameTests
         var game = new GravityShiftGame(input, levels: [Quick]);
         Tap(game, input, Keys.E);
         RunUntil(game, input, () => game.Banner.Length > 0);
-        Run(game, input, Tuning.DeliveredPause + Frame); // wraps round to the same level
+        Run(game, input, Tuning.DeliveredPause + Frame); // the "all delivered" screen
+        Tap(game, input, Keys.Enter); // to the level select
+        Tap(game, input, Keys.Enter); // play it again
 
         Tap(game, input, Keys.W);
         Assert.Equal(1, game.Shifts);
