@@ -22,6 +22,11 @@
         };
         _renderSurface.Initialize();
 
+        // Pixel art: nearest-neighbour sampling keeps the 16x16 tiles crisp. Set before any
+        // texture loads, then load them all up front so the first frame isn't missing any.
+        _renderSurface.SetDefaultSampling(Yaeger.Platform.TextureSampling.Pixelated);
+        await _renderSurface.PreloadAsync(GravityShift.Art.All);
+
         // Stop the page (and the itch.io iframe) scrolling when playing with arrows/space.
         BrowserInputState.SetPreventDefaultKeys(
             [Keys.Left, Keys.Right, Keys.Up, Keys.Down, Keys.Space]

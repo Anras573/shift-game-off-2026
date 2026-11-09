@@ -8,11 +8,18 @@
     <AssemblyName>GravityShift</AssemblyName>
   </PropertyGroup>
 
-  <!-- The HUD font lives with the web build; copy it next to the desktop executable too. -->
+  <!-- The HUD font and the textures live with the web build; copy them next to the desktop
+       executable too (textures keep their relative "textures/..." paths). -->
   <ItemGroup>
     <None
       Include="..\GravityShift.Web\wwwroot\fonts\*"
       Link="Assets\Fonts\%(Filename)%(Extension)"
+      CopyToOutputDirectory="PreserveNewest"
+      CopyToPublishDirectory="PreserveNewest"
+    />
+    <None
+      Include="..\GravityShift.Web\wwwroot\textures\*.png"
+      Link="textures\%(Filename)%(Extension)"
       CopyToOutputDirectory="PreserveNewest"
       CopyToPublishDirectory="PreserveNewest"
     />

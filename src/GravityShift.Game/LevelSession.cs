@@ -20,14 +20,7 @@ namespace GravityShift;
 /// </summary>
 public sealed class LevelSession
 {
-    private static readonly Color WallColor = new(70, 78, 104);
-    private static readonly Color BackgroundColor = new(24, 26, 38);
-    private static readonly Color GoalColor = new(255, 214, 92);
-    private static readonly Color HazardColor = new(220, 60, 70);
-    private static readonly Color ParcelColor = new(196, 140, 84);
-    private static readonly Color BeltColor = new(54, 112, 120);
-    private static readonly Color BeltStripeColor = new(140, 220, 225);
-    private static readonly Color LockColor = new(150, 90, 230, 90); // translucent: a zone, not a wall
+    private static readonly Color BeltStripeColor = new(140, 220, 225, 160);
 
     private readonly PhysicsWorld2D _physics;
     private readonly CharacterControllerSystem _controller;
@@ -68,15 +61,7 @@ public sealed class LevelSession
         var shake = new ScreenShake(enabled: !reducedMotion);
         _camera = new CameraRotationSystem(World, Gravity, viewport, shake);
         _rules = new LevelRulesSystem(World, level, _controller);
-        _feel = new FeelSystem(
-            World,
-            Gravity,
-            shake,
-            () => _rules.Outcome,
-            () => _camera.Rotation,
-            ParcelColor,
-            LockColor
-        );
+        _feel = new FeelSystem(World, Gravity, shake, () => _rules.Outcome, () => _camera.Rotation);
         _gravityShift.ShiftLocked += _feel.OnShiftLocked;
 
         if (renderSurface is not null)
@@ -159,28 +144,31 @@ public sealed class LevelSession
     {
         var level = Level;
 
-        var background = World.CreateEntity("background");
-        World.AddComponent(background, new Transform2D(Vector2.Zero, scale: level.WorldSize));
-        World.AddComponent(
-            background,
-            new Sprite(IRenderSurface.SolidTexturePath, BackgroundColor)
-        );
-        World.AddComponent(background, new RenderLayer(0));
-
-        // One flat-colour tile (the engine's built-in 1x1 white texture), marked solid so
-        // TilemapColliderSystem generates merged colliders from it.
-        var tileset = new Tileset(IRenderSurface.SolidTexturePath, 1, 1, [0]);
-        var tilemap = new Tilemap(
-            tileset,
+        var background = new Tilemap(
+            Art.BackgroundTileset(),
             level.Width,
             level.Height,
-            new Vector2(Tuning.TileSize),
-            WallColor
+            new Vector2(Tuning.TileSize)
+        );
+        for (var row = 0; row < level.Height; row++)
+        for (var column = 0; column < level.Width; column++)
+            background.SetTile(column, row, (column + row) % 2);
+        var backdrop = World.CreateEntity("background");
+        World.AddComponent(backdrop, new Transform2D(level.Origin));
+        World.AddComponent(backdrop, background);
+        World.AddComponent(backdrop, new RenderLayer(0));
+
+        // Every wall tile is solid, so TilemapColliderSystem generates merged colliders.
+        var tilemap = new Tilemap(
+            Art.WallTileset(),
+            level.Width,
+            level.Height,
+            new Vector2(Tuning.TileSize)
         );
         for (var row = 0; row < level.Height; row++)
         for (var column = 0; column < level.Width; column++)
             if (level.IsSolid(column, row))
-                tilemap.SetTile(column, row, 0);
+                tilemap.SetTile(column, row, Art.WallTile(level, column, row));
 
         var walls = World.CreateEntity("walls");
         World.AddComponent(walls, new Transform2D(level.Origin));
@@ -189,20 +177,28 @@ public sealed class LevelSession
 
         // Chutes are generous (touching counts), shredders forgiving (must overlap a bit).
         if (level.Belts.Count > 0)
-            BuildBelts(tileset);
+            BuildBelts();
 
         foreach (var cell in level.Locks)
             CreateTrigger<GravityLock>(
                 level.CellCenter(cell),
-                LockColor,
+                new Sprite(Art.Lock, FeelSystem.LockTint),
                 Tuning.TileSize,
                 layer: 1
             );
 
         foreach (var cell in level.Goals)
-            CreateTrigger<Goal>(level.CellCenter(cell), GoalColor, Tuning.TileSize * 1.2f);
+            CreateTrigger<Goal>(
+                level.CellCenter(cell),
+                new Sprite(Art.Chute),
+                Tuning.TileSize * 1.2f
+            );
         foreach (var cell in level.Hazards)
-            CreateTrigger<Hazard>(level.CellCenter(cell), HazardColor, Tuning.TileSize * 0.7f);
+            CreateTrigger<Hazard>(
+                level.CellCenter(cell),
+                new Sprite(Art.Shredder),
+                Tuning.TileSize * 0.7f
+            );
 
         var player = World.CreateEntity("player");
         World.AddComponent(player, new Player());
@@ -219,7 +215,7 @@ public sealed class LevelSession
             parcel,
             new Transform2D(level.CellCenter(level.Spawn), scale: new Vector2(Tuning.PlayerSize))
         );
-        World.AddComponent(parcel, new Sprite(IRenderSurface.SolidTexturePath, ParcelColor));
+        World.AddComponent(parcel, new Sprite(Art.Parcel));
         World.AddComponent(parcel, new RenderLayer(3));
 
         var camera = World.CreateEntity("camera");
@@ -233,19 +229,18 @@ public sealed class LevelSession
         );
     }
 
-    private void BuildBelts(Tileset tileset)
+    private void BuildBelts()
     {
         var level = Level;
         var belts = new Tilemap(
-            tileset,
+            Art.BeltTileset(),
             level.Width,
             level.Height,
-            new Vector2(Tuning.TileSize),
-            BeltColor
+            new Vector2(Tuning.TileSize)
         );
         foreach (var (cell, direction) in level.Belts)
         {
-            belts.SetTile(cell.Column, cell.Row, 0);
+            belts.SetTile(cell.Column, cell.Row, MathF.Abs(direction.X) > 0f ? 0 : 1);
 
             // A thin stripe across the belt, slid along it by BeltMarkerSystem.
             var stripe = World.CreateEntity();
@@ -271,7 +266,7 @@ public sealed class LevelSession
 
     private void CreateTrigger<TMarker>(
         Vector2 position,
-        Color color,
+        Sprite sprite,
         float triggerSize,
         int layer = 2
     )
@@ -281,7 +276,7 @@ public sealed class LevelSession
         World.AddComponent(entity, default(TMarker));
         World.AddComponent(entity, new BoxCollider2D(new Vector2(triggerSize), isTrigger: true));
         World.AddComponent(entity, new Transform2D(position, scale: new Vector2(Tuning.TileSize)));
-        World.AddComponent(entity, new Sprite(IRenderSurface.SolidTexturePath, color));
+        World.AddComponent(entity, sprite);
         World.AddComponent(entity, new RenderLayer(layer));
     }
 }

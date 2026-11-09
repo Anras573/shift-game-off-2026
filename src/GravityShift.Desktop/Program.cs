@@ -14,6 +14,9 @@ using var window = Window.Create(
     }
 );
 var renderer = new Renderer(window);
+
+// Pixel art: nearest-neighbour sampling keeps the 16x16 tiles crisp.
+renderer.Textures.DefaultSampling = TextureSampling.Pixelated;
 var textRenderer = new TextRenderer(window);
 using var fonts = new FontManager();
 var hudFont = fonts.Load(

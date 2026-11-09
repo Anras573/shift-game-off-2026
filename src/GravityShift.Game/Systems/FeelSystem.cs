@@ -24,15 +24,16 @@ namespace GravityShift.Systems;
 /// </summary>
 public sealed class FeelSystem : IUpdateSystem
 {
-    private static readonly Color ShreddedColor = new(255, 70, 70);
+    /// <summary>Lock tint at rest: the texture is drawn strong and shown translucent.</summary>
+    public static readonly Color LockTint = new(255, 255, 255, 110);
+
+    private static readonly Color ShreddedTint = new(255, 80, 80);
+    private static readonly Color LockFlashTint = Color.White;
 
     private readonly World _world;
     private readonly GravityState _gravity;
     private readonly Func<LevelOutcome> _outcome;
     private readonly Func<float> _cameraRotation;
-    private readonly Color _parcelColor;
-    private readonly Color _lockColor;
-    private readonly Color _lockFlashColor;
 
     private float _squash; // + squashed (wide, short), - stretched (narrow, tall)
     private float _squashVelocity;
@@ -45,9 +46,7 @@ public sealed class FeelSystem : IUpdateSystem
         GravityState gravity,
         ScreenShake shake,
         Func<LevelOutcome> outcome,
-        Func<float> cameraRotation,
-        Color parcelColor,
-        Color lockColor
+        Func<float> cameraRotation
     )
     {
         _world = world;
@@ -55,9 +54,6 @@ public sealed class FeelSystem : IUpdateSystem
         Shake = shake;
         _outcome = outcome;
         _cameraRotation = cameraRotation;
-        _parcelColor = parcelColor;
-        _lockColor = lockColor;
-        _lockFlashColor = new Color(220, 170, 255, 170);
     }
 
     public ScreenShake Shake { get; }
@@ -152,7 +148,7 @@ public sealed class FeelSystem : IUpdateSystem
         var scale = new Vector2(size * (1f + squash), size * (1f - squash));
         // Keep the feet where the physics body's feet are: a shorter parcel sits lower.
         var position = body.Position + down * (size * squash / 2f);
-        var color = _parcelColor;
+        var tint = Color.White;
 
         switch (_seenOutcome)
         {
@@ -166,7 +162,7 @@ public sealed class FeelSystem : IUpdateSystem
             case LevelOutcome.Shredded:
             {
                 var flash = MathF.Sin(_endTime * 40f) > 0f;
-                color = flash ? ShreddedColor : _parcelColor;
+                tint = flash ? ShreddedTint : Color.White;
                 var jitter = MathF.Max(0f, 1f - _endTime / 0.5f) * size * 0.25f;
                 position +=
                     new Vector2(MathF.Sin(_endTime * 83f), MathF.Cos(_endTime * 71f)) * jitter;
@@ -178,7 +174,7 @@ public sealed class FeelSystem : IUpdateSystem
         }
 
         _world.AddComponent(parcel, new Transform2D(position, _cameraRotation(), scale));
-        _world.AddComponent(parcel, new Sprite(IRenderSurface.SolidTexturePath, color));
+        _world.AddComponent(parcel, new Sprite(Art.Parcel, tint));
     }
 
     private void UpdateLocks(float deltaTime)
@@ -187,8 +183,8 @@ public sealed class FeelSystem : IUpdateSystem
             return;
 
         _lockFlash = MathF.Max(0f, _lockFlash - deltaTime);
-        var color = _lockFlash > 0f ? _lockFlashColor : _lockColor;
+        var tint = _lockFlash > 0f ? LockFlashTint : LockTint;
         foreach (var (entity, _, _) in _world.Query<GravityLock, Sprite>().ToList())
-            _world.AddComponent(entity, new Sprite(IRenderSurface.SolidTexturePath, color));
+            _world.AddComponent(entity, new Sprite(Art.Lock, tint));
     }
 }

@@ -124,6 +124,20 @@ dotnet test tests/GravityShift.Tests   # make sure everything still works
 git add engine/Yaeger && git commit -m "Bump Yaeger"
 ```
 
+## Art
+
+All textures (16×16 pixel tiles in `src/GravityShift.Web/wwwroot/textures`) are drawn in code
+by `tools/generate_art.py` (needs Pillow). Change a colour or shape there and re-run:
+
+```bash
+python3 tools/generate_art.py
+```
+
+The PNGs are committed, so building the game doesn't need Python. Any PNG can be swapped for
+hand-made art of the same size and layout: `walls.png` is a 4×4 sheet indexed by which sides
+face the room (up 1, right 2, down 4, left 8), `belts.png` is horizontal then vertical, and
+`background.png` holds two alternating tiles. The desktop build copies the same files.
+
 ## Third-party assets
 
 - `src/GravityShift.Web/wwwroot/fonts/DejaVuSans-Bold.ttf`: DejaVu fonts, Bitstream Vera
