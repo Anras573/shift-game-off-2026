@@ -83,4 +83,17 @@ public static class Tuning
 
     /// <summary>Upper bound on simulation steps per frame (spiral-of-death guard).</summary>
     public const int MaxStepsPerFrame = 8;
+
+    // Audio (gains are each sound's own volume, before the mixer).
+
+    /// <summary>Landings slower than this (u/s along gravity) make no sound.</summary>
+    public const float LandSoundMinSpeed = 0.5f;
+
+    public const float MusicGain = 0.45f;
+    public const float ShiftGain = 0.5f;
+    public const float LandGain = 0.8f;
+    public const float LockedGain = 0.6f;
+    public const float ShredGain = 0.8f;
+    public const float DeliverGain = 0.7f;
+    public const float LostGain = 0.6f;
 }

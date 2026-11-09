@@ -8,8 +8,8 @@
     <AssemblyName>GravityShift</AssemblyName>
   </PropertyGroup>
 
-  <!-- The HUD font and the textures live with the web build; copy them next to the desktop
-       executable too (textures keep their relative "textures/..." paths). -->
+  <!-- The HUD font, textures and audio live with the web build; copy them next to the desktop
+       executable too (textures and audio keep their relative "textures/...", "audio/..." paths). -->
   <ItemGroup>
     <None
       Include="..\GravityShift.Web\wwwroot\fonts\*"
@@ -20,6 +20,13 @@
     <None
       Include="..\GravityShift.Web\wwwroot\textures\*.png"
       Link="textures\%(Filename)%(Extension)"
+      CopyToOutputDirectory="PreserveNewest"
+      CopyToPublishDirectory="PreserveNewest"
+    />
+    <!-- Native streaming is Ogg-only, so the browser's .m4a fallback isn't needed here. -->
+    <None
+      Include="..\GravityShift.Web\wwwroot\audio\*.wav;..\GravityShift.Web\wwwroot\audio\*.ogg"
+      Link="audio\%(Filename)%(Extension)"
       CopyToOutputDirectory="PreserveNewest"
       CopyToPublishDirectory="PreserveNewest"
     />

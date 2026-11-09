@@ -44,6 +44,18 @@
                 "window.matchMedia('(prefers-reduced-motion: reduce)').matches"
             );
 
+        // Sound loads now; browsers only let it play after the first key press or tap, and the
+        // music starts then. A broken file just means playing without sound.
+        GravityShift.Audio.GameSounds? sounds = null;
+        try
+        {
+            sounds = await GravityShift.Audio.GameSounds.LoadAsync(new BrowserAudioOutput());
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Sound disabled: {ex.Message}");
+        }
+
         var timeSource = new BrowserTimeSource();
         var game = new GravityShiftGame(
             new BrowserInputState(),
@@ -51,7 +63,8 @@
             _renderSurface,
             textSurface: new BrowserTextRenderSurface(_renderSurface),
             hudFont: new Yaeger.Graphics.FontHandle(HudFontFamily),
-            reducedMotion: reducedMotion
+            reducedMotion: reducedMotion,
+            sounds: sounds
         );
 
         // Playtesting shortcut: ?level=5 starts on the fifth level.
