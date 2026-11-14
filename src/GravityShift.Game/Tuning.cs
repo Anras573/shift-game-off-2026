@@ -96,4 +96,5 @@ public static class Tuning
     public const float ShredGain = 0.8f;
     public const float DeliverGain = 0.7f;
     public const float LostGain = 0.6f;
+    public const float MenuMoveGain = 0.35f;
 }

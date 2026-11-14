@@ -103,6 +103,17 @@ public sealed class LevelSession
         _feel.Update(deltaTime);
     }
 
+    /// <summary>
+    /// Animates the level without simulating it or reading input: the backdrop behind the
+    /// menus (camera fit, moving belts).
+    /// </summary>
+    public void Idle(float deltaTime)
+    {
+        _camera.Update(deltaTime);
+        _beltMarkers.Update(deltaTime);
+        _feel.Update(deltaTime);
+    }
+
     /// <summary>Runs exactly one fixed simulation step. Public for deterministic tests.</summary>
     public void Step(float step)
     {

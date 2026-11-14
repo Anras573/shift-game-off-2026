@@ -64,10 +64,11 @@
             textSurface: new BrowserTextRenderSurface(_renderSurface),
             hudFont: new Yaeger.Graphics.FontHandle(HudFontFamily),
             reducedMotion: reducedMotion,
-            sounds: sounds
+            sounds: sounds,
+            startScreen: GravityShift.Menus.GameScreen.Title
         );
 
-        // Playtesting shortcut: ?level=5 starts on the fifth level.
+        // Playtesting shortcut: ?level=5 skips the title and starts on the fifth level.
         if (int.TryParse(query["level"], out var level) && level >= 1 && level <= game.LevelCount)
             game.LoadLevel(level - 1);
 

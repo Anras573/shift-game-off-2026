@@ -121,7 +121,7 @@ jobs:
             `xattr -dr com.apple.quarantine <extracted-folder>` or allow it under
             System Settings → Privacy & Security.
 
-            Controls: A/D or ←/→ walk · Q/E shift gravity · W/↑/Space flip · R restart · M mute · Esc quit
+            Controls: A/D or ←/→ walk · Q/E shift gravity · W/↑/Space flip · R restart · M mute · Esc menu (quits from the title)
 
   itch:
     needs: [web, desktop]
