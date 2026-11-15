@@ -16,7 +16,20 @@ internal sealed class FakeInput : IInputState
 
     public void Tap(Keys key) => _pressedThisFrame.Add(key);
 
-    public void EndFrame() => _pressedThisFrame.Clear();
+    private bool _clicked;
+
+    /// <summary>A left click (or tap) this frame at <paramref name="ndc"/> (y up).</summary>
+    public void Click(Vector2 ndc)
+    {
+        MousePositionNdc = ndc;
+        _clicked = true;
+    }
+
+    public void EndFrame()
+    {
+        _pressedThisFrame.Clear();
+        _clicked = false;
+    }
 
     public bool IsKeyPressed(Keys key) => _held.Contains(key);
 
@@ -26,11 +39,11 @@ internal sealed class FakeInput : IInputState
 
     public bool IsMouseButtonPressed(MouseButton button) => false;
 
-    public bool WasMouseButtonPressed(MouseButton button) => false;
+    public bool WasMouseButtonPressed(MouseButton button) => _clicked && button == MouseButton.Left;
 
     public bool WasMouseButtonReleased(MouseButton button) => false;
 
     public Vector2 MousePosition => Vector2.Zero;
-    public Vector2 MousePositionNdc => Vector2.Zero;
+    public Vector2 MousePositionNdc { get; private set; }
     public float ScrollDelta => 0f;
 }

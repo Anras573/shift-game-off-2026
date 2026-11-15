@@ -93,6 +93,12 @@ public sealed class GameSounds
             }
         );
 
+    /// <summary>A soft tick when the menu selection moves.</summary>
+    public void MenuMove() => _output.Play(_land, Tuning.MenuMoveGain, 1.6f);
+
+    /// <summary>A whoosh when a menu choice is made.</summary>
+    public void MenuConfirm() => _output.Play(_shift, Tuning.ShiftGain, 1.2f);
+
     public void ShiftLocked() => _output.Play(_locked, Tuning.LockedGain);
 
     /// <summary>A thud, louder the harder the parcel lands; small settles stay silent.</summary>
